@@ -1,6 +1,7 @@
-import React from 'react';
+
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCw, WifiOff, Wifi, AlertCircle } from 'lucide-react';
+import { RefreshCw, WifiOff, AlertCircle, ExternalLink } from 'lucide-react';
 import { CheckResult, ConnectivityStatus, SiteConfig } from '../types';
 
 interface StatusCardProps {
@@ -9,93 +10,183 @@ interface StatusCardProps {
   onCheck: (id: string, url: string) => void;
 }
 
-const getStatusColor = (status: ConnectivityStatus, latency: number) => {
-  switch (status) {
-    case ConnectivityStatus.IDLE:
-      return 'border-border bg-surface text-muted';
-    case ConnectivityStatus.PENDING:
-      return 'border-blue-500/30 bg-blue-500/5 text-blue-600 dark:text-blue-400';
-    case ConnectivityStatus.TIMEOUT:
-      return 'border-warning/50 bg-warning/10 text-yellow-600 dark:text-yellow-400';
-    case ConnectivityStatus.ERROR:
-      return 'border-danger/50 bg-danger/10 text-red-600 dark:text-red-400';
-    case ConnectivityStatus.SUCCESS:
-      if (latency < 200) return 'border-green-500/50 bg-green-500/10 text-green-600 dark:text-green-400';
-      if (latency < 800) return 'border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400';
-      return 'border-orange-500/50 bg-orange-500/10 text-orange-600 dark:text-orange-400';
-    default:
-      return 'border-border bg-surface';
-  }
-};
-
-const getStatusLabel = (status: ConnectivityStatus, latency: number) => {
-  switch (status) {
-    case ConnectivityStatus.IDLE: return 'Waiting...';
-    case ConnectivityStatus.PENDING: return 'Pinging...';
-    case ConnectivityStatus.TIMEOUT: return 'Timeout';
-    case ConnectivityStatus.ERROR: return 'Unreachable';
-    case ConnectivityStatus.SUCCESS: return `${latency}ms`;
-  }
-};
-
 export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck }) => {
   const status = result?.status || ConnectivityStatus.IDLE;
   const latency = result?.latency || 0;
 
-  const colorClass = getStatusColor(status, latency);
-  const Icon = site.icon;
-
-  // Determine which status icon to show
-  const StatusIcon = () => {
-    if (status === ConnectivityStatus.PENDING) return <RefreshCw className="w-4 h-4 animate-spin" />;
-    if (status === ConnectivityStatus.ERROR) return <WifiOff className="w-4 h-4" />;
-    if (status === ConnectivityStatus.TIMEOUT) return <AlertCircle className="w-4 h-4" />;
-    if (status === ConnectivityStatus.SUCCESS) return <Wifi className="w-4 h-4" />;
-    return <div className="w-4 h-4" />;
+  const getStatusStyles = () => {
+    switch (status) {
+      case ConnectivityStatus.IDLE:
+        return {
+          border: 'border-border',
+          bg: 'bg-surface',
+          indicator: 'bg-muted/30',
+          glow: '',
+          text: 'text-muted'
+        };
+      case ConnectivityStatus.PENDING:
+        return {
+          border: 'border-primary/30',
+          bg: 'bg-surface',
+          indicator: 'bg-primary animate-pulse',
+          glow: 'shadow-[0_0_15px_-3px_rgba(59,130,246,0.1)]',
+          text: 'text-primary'
+        };
+      case ConnectivityStatus.TIMEOUT:
+        return {
+          border: 'border-warning/50',
+          bg: 'bg-warning/5',
+          indicator: 'bg-warning',
+          glow: 'shadow-[0_0_15px_-3px_rgba(234,179,8,0.15)]',
+          text: 'text-yellow-600 dark:text-yellow-400'
+        };
+      case ConnectivityStatus.ERROR:
+        return {
+          border: 'border-danger/50',
+          bg: 'bg-danger/5',
+          indicator: 'bg-danger',
+          glow: 'shadow-[0_0_15px_-3px_rgba(239,68,68,0.2)]',
+          text: 'text-danger'
+        };
+      case ConnectivityStatus.SUCCESS:
+        if (latency < 200) return {
+          border: 'border-green-500/30',
+          bg: 'bg-surface',
+          indicator: 'bg-success',
+          glow: 'shadow-[0_0_20px_-5px_rgba(34,197,94,0.15)]',
+          text: 'text-success'
+        };
+        if (latency < 800) return {
+          border: 'border-yellow-500/30',
+          bg: 'bg-surface',
+          indicator: 'bg-yellow-500',
+          glow: 'shadow-[0_0_15px_-3px_rgba(234,179,8,0.1)]',
+          text: 'text-yellow-600 dark:text-yellow-400'
+        };
+        return {
+          border: 'border-orange-500/30',
+          bg: 'bg-surface',
+          indicator: 'bg-orange-500',
+          glow: 'shadow-[0_0_15px_-3px_rgba(249,115,22,0.1)]',
+          text: 'text-orange-600 dark:text-orange-400'
+        };
+      default:
+        return { border: 'border-border', bg: 'bg-surface', indicator: 'bg-muted', glow: '', text: 'text-muted' };
+    }
   };
+
+  const styles = getStatusStyles();
+
+  const faviconUrl = useMemo(() => {
+    try {
+      const urlObj = new URL(site.url);
+      return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=128`;
+    } catch (e) {
+      return '';
+    }
+  }, [site.url]);
+
+  const latencyPercent = Math.min((latency / 1000) * 100, 100);
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      whileHover={{ y: -2 }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4, scale: 1.01 }}
       transition={{ duration: 0.2 }}
-      className={`relative group p-4 rounded-xl border ${colorClass} shadow-sm hover:shadow-md transition-all duration-300 flex flex-col gap-3`}
+      className={`
+        relative group overflow-hidden
+        rounded-2xl border ${styles.border} ${styles.bg} ${styles.glow}
+        transition-all duration-300 flex flex-col h-[120px]
+      `}
     >
-      <div className="flex justify-between items-start">
-        <div className="p-2 rounded-lg bg-black/5 dark:bg-black/20">
-          <Icon className="w-6 h-6" />
+      <div className="flex-1 p-4 flex items-start justify-between relative z-10">
+        <div className="flex items-start gap-3">
+          {/* Icon Container */}
+          <div className="relative p-2 rounded-xl bg-background/50 border border-border/50 shadow-sm backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+            <img 
+              src={faviconUrl} 
+              alt={`${site.name} icon`} 
+              className="w-8 h-8 object-contain rounded-sm"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          </div>
+          
+          {/* Text Info */}
+          <div className="flex flex-col">
+            <h3 className="font-bold text-base text-text leading-tight">{site.name}</h3>
+            <a 
+              href={site.url} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-[10px] text-muted/60 hover:text-primary truncate max-w-[100px] mt-1 flex items-center gap-0.5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {site.url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}
+              <ExternalLink className="w-2 h-2 opacity-50" />
+            </a>
+          </div>
         </div>
-        <div className={`text-xs font-mono font-medium px-2 py-1 rounded-full bg-black/5 dark:bg-black/20 flex items-center gap-1.5 min-w-[80px] justify-center`}>
-           <StatusIcon />
-           <span>{getStatusLabel(status, latency)}</span>
+
+        {/* Status Badge */}
+        <div className="flex flex-col items-end gap-1">
+          <div className={`w-2.5 h-2.5 rounded-full ${styles.indicator} shadow-sm ring-2 ring-background/10`} />
+          {status === ConnectivityStatus.SUCCESS && (
+            <span className={`text-xs font-mono font-bold ${styles.text}`}>
+              {latency}ms
+            </span>
+          )}
         </div>
       </div>
 
-      <div>
-        <h3 className="font-semibold text-lg tracking-tight text-text">{site.name}</h3>
-        <p className="text-xs text-muted truncate opacity-70">{site.url.replace('https://', '')}</p>
+      {/* Middle Status/Action Area */}
+      <div className="px-4 pb-3 relative z-10">
+         {status === ConnectivityStatus.PENDING && (
+           <div className="flex items-center gap-2 text-xs text-primary animate-pulse">
+             <RefreshCw className="w-3 h-3 animate-spin" />
+             <span>Pinging...</span>
+           </div>
+         )}
+         {status === ConnectivityStatus.ERROR && (
+           <div className="flex items-center gap-2 text-xs text-danger">
+             <WifiOff className="w-3 h-3" />
+             <span>Unreachable</span>
+           </div>
+         )}
+         {status === ConnectivityStatus.TIMEOUT && (
+           <div className="flex items-center gap-2 text-xs text-yellow-600 dark:text-yellow-500">
+             <AlertCircle className="w-3 h-3" />
+             <span>Timeout</span>
+           </div>
+         )}
+         {status === ConnectivityStatus.IDLE && (
+           <div className="text-xs text-muted/50">Waiting to check...</div>
+         )}
       </div>
 
-      {/* Interactive Overlay for manual recheck */}
-      <button
-        onClick={() => onCheck(site.id, site.url)}
-        className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity bg-black/5 dark:bg-white/5 rounded-xl cursor-pointer focus:outline-none focus:ring-2 ring-primary/50"
-        title="Click to re-check"
-        aria-label={`Check status for ${site.name}`}
-      />
-      
-      {/* Progress Bar for Latency Visual */}
-      {status === ConnectivityStatus.SUCCESS && (
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-800 rounded-b-xl overflow-hidden">
+      {/* Latency Bar (Bottom) */}
+      <div className="h-1 w-full bg-black/5 dark:bg-white/5 mt-auto relative">
+        {status === ConnectivityStatus.SUCCESS && (
           <motion.div 
             initial={{ width: 0 }}
-            animate={{ width: `${Math.min((latency / 2000) * 100, 100)}%` }}
-            className={`h-full ${latency < 200 ? 'bg-green-500' : latency < 800 ? 'bg-yellow-500' : 'bg-orange-500'}`}
+            animate={{ width: `${latencyPercent}%` }}
+            className={`h-full ${latency < 200 ? 'bg-green-500' : latency < 500 ? 'bg-green-400' : latency < 1000 ? 'bg-yellow-500' : 'bg-orange-500'}`}
           />
-        </div>
-      )}
+        )}
+      </div>
+
+      {/* Click Overlay */}
+      <button
+        onClick={() => onCheck(site.id, site.url)}
+        className="absolute inset-0 w-full h-full z-20 cursor-pointer outline-none"
+        aria-label={`Check ${site.name} again`}
+      />
+      
+      {/* Background decorative elements */}
+      <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent dark:from-white/5 pointer-events-none rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
     </motion.div>
   );
 };

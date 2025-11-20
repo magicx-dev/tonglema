@@ -1,10 +1,8 @@
-import { LucideIcon } from 'lucide-react';
 
 export interface SiteConfig {
   id: string;
   name: string;
   url: string; // The URL to ping (usually the homepage or a highly available asset)
-  icon: LucideIcon;
   category: 'Search' | 'Social' | 'AI' | 'Media' | 'Dev' | 'Other';
   description?: string;
 }

@@ -1,20 +1,4 @@
-import { 
-  Search, 
-  Youtube, 
-  Bot, 
-  Twitter, 
-  MessageCircle, 
-  Github, 
-  Globe, 
-  Film, 
-  Music, 
-  Cloud,
-  Code,
-  Image,
-  Mail,
-  Tv,
-  Sparkles
-} from 'lucide-react';
+
 import { SiteConfig } from './types';
 
 export const SITES: SiteConfig[] = [
@@ -22,14 +6,12 @@ export const SITES: SiteConfig[] = [
     id: 'google',
     name: 'Google',
     url: 'https://www.google.com',
-    icon: Search,
     category: 'Search',
   },
   {
     id: 'gemini',
     name: 'Gemini',
     url: 'https://gemini.google.com',
-    icon: Bot, // Using Bot as a generic AI icon
     category: 'AI',
     description: 'Google Advanced AI'
   },
@@ -37,105 +19,90 @@ export const SITES: SiteConfig[] = [
     id: 'chatgpt',
     name: 'ChatGPT',
     url: 'https://chatgpt.com',
-    icon: MessageCircle,
     category: 'AI',
   },
   {
     id: 'claude',
     name: 'Claude',
     url: 'https://claude.ai',
-    icon: Sparkles,
     category: 'AI',
   },
   {
     id: 'midjourney',
     name: 'Midjourney',
     url: 'https://www.midjourney.com',
-    icon: Image,
     category: 'AI',
   },
   {
     id: 'youtube',
     name: 'YouTube',
     url: 'https://www.youtube.com',
-    icon: Youtube,
     category: 'Media',
   },
   {
     id: 'twitter',
     name: 'Twitter / X',
     url: 'https://twitter.com',
-    icon: Twitter,
     category: 'Social',
   },
   {
     id: 'github',
     name: 'GitHub',
     url: 'https://github.com',
-    icon: Github,
     category: 'Dev',
   },
   {
     id: 'reddit',
     name: 'Reddit',
     url: 'https://www.reddit.com',
-    icon: Globe,
     category: 'Social',
   },
   {
     id: 'wikipedia',
     name: 'Wikipedia',
     url: 'https://www.wikipedia.org',
-    icon: Globe,
     category: 'Search',
   },
   {
     id: 'netflix',
     name: 'Netflix',
     url: 'https://www.netflix.com',
-    icon: Film,
     category: 'Media',
   },
   {
     id: 'spotify',
     name: 'Spotify',
     url: 'https://www.spotify.com',
-    icon: Music,
     category: 'Media',
   },
   {
     id: 'telegram',
     name: 'Telegram',
     url: 'https://telegram.org',
-    icon: Mail,
     category: 'Social',
   },
   {
     id: 'discord',
     name: 'Discord',
     url: 'https://discord.com',
-    icon: MessageCircle,
     category: 'Social',
   },
   {
     id: 'aws',
     name: 'AWS Console',
     url: 'https://aws.amazon.com',
-    icon: Cloud,
     category: 'Dev',
   },
   {
     id: 'stackoverflow',
     name: 'Stack Overflow',
     url: 'https://stackoverflow.com',
-    icon: Code,
     category: 'Dev',
   },
   {
     id: 'twitch',
     name: 'Twitch',
     url: 'https://www.twitch.tv',
-    icon: Tv,
     category: 'Media',
   }
 ];

@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
 import { StatusCard } from './components/StatusCard';
@@ -11,6 +12,7 @@ export default function App() {
   const [isChecking, setIsChecking] = useState(false);
   const [lastChecked, setLastChecked] = useState<number | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [refreshInterval, setRefreshInterval] = useState<number>(0); // 0 = off
 
   // Theme toggle handler
   const toggleTheme = useCallback(() => {
@@ -64,25 +66,38 @@ export default function App() {
 
   // Function to check all sites
   const handleCheckAll = useCallback(async () => {
+    // If we are already strictly checking manually, maybe we don't block, 
+    // but for simplicity let's prevent overlaps
     if (isChecking) return;
     
     setIsChecking(true);
     setLastChecked(Date.now());
 
-    // Initialize all to pending
-    const pendingState: CheckResultMap = {};
-    SITES.forEach(site => {
-      pendingState[site.id] = {
-        siteId: site.id,
-        status: ConnectivityStatus.PENDING,
-        latency: 0,
-        timestamp: Date.now()
-      };
+    // NOTE: We do NOT reset all to PENDING here if we want a smoother auto-refresh experience.
+    // We only want visual updates when new data comes in.
+    // But for manual "Check Now", user might expect a reset. 
+    // Let's assume we keep existing state and just update status to PENDING locally per item effectively
+    // or just let the UI show loading spinner based on internal state if needed.
+    // For this app, showing "Pinging..." in the card (handled by StatusCard status) is good.
+    
+    // To avoid "flashing" the whole UI to grey, we can iterate and set status to PENDING 
+    // only if we want that visual feedback. 
+    // Let's update the statuses to PENDING to show activity.
+    setResults(prev => {
+      const next = { ...prev };
+      SITES.forEach(site => {
+        next[site.id] = {
+          ...(next[site.id] || { latency: 0 }),
+          siteId: site.id,
+          status: ConnectivityStatus.PENDING,
+          timestamp: Date.now()
+        };
+      });
+      return next;
     });
-    setResults(pendingState);
 
     // Execute in batches
-    const batchSize = 4;
+    const batchSize = 6; // Increased batch size
     for (let i = 0; i < SITES.length; i += batchSize) {
       const batch = SITES.slice(i, i + batchSize);
       const promises = batch.map(site => checkConnectivity(site.id, site.url));
@@ -99,6 +114,20 @@ export default function App() {
 
     setIsChecking(false);
   }, [isChecking]);
+
+  // Auto Refresh Effect
+  useEffect(() => {
+    if (refreshInterval === 0) return;
+
+    const id = setInterval(() => {
+      // We need to bypass the `isChecking` check inside handleCheckAll partially 
+      // or ensure handleCheckAll is stable. 
+      // If `isChecking` is true, the interval callback will just return, which is fine.
+      handleCheckAll();
+    }, refreshInterval);
+
+    return () => clearInterval(id);
+  }, [refreshInterval, handleCheckAll]);
 
   // Run check on mount
   useEffect(() => {
@@ -130,66 +159,75 @@ export default function App() {
   const categoryOrder = ['AI', 'Search', 'Social', 'Media', 'Dev'];
 
   return (
-    <div className="min-h-screen bg-background text-text flex flex-col transition-colors duration-300">
+    <div className="min-h-screen bg-background text-text flex flex-col transition-colors duration-500">
       <Header 
         onCheckAll={handleCheckAll} 
         isChecking={isChecking} 
         lastChecked={lastChecked}
         theme={theme}
         toggleTheme={toggleTheme}
+        refreshInterval={refreshInterval}
+        setRefreshInterval={setRefreshInterval}
       />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8 space-y-10">
         
         {/* Overview Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-          <div className="bg-surface border border-border rounded-xl p-5 flex items-center gap-4 shadow-sm">
-             <div className="p-3 rounded-full bg-green-500/10 text-green-600 dark:text-green-400">
-               <Shield className="w-6 h-6" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-surface/50 backdrop-blur-sm border border-border rounded-2xl p-6 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow">
+             <div className="p-3.5 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400 ring-1 ring-green-500/20">
+               <Shield className="w-7 h-7" />
              </div>
              <div>
-               <p className="text-sm text-muted">Services Online</p>
-               <p className="text-2xl font-bold text-text">{stats.online} <span className="text-muted text-base font-normal">/ {SITES.length}</span></p>
+               <p className="text-sm font-medium text-muted uppercase tracking-wider">Services Online</p>
+               <div className="flex items-baseline gap-2">
+                 <p className="text-3xl font-bold text-text">{stats.online}</p>
+                 <span className="text-muted text-sm">/ {SITES.length}</span>
+               </div>
              </div>
           </div>
-          <div className="bg-surface border border-border rounded-xl p-5 flex items-center gap-4 shadow-sm">
-             <div className="p-3 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
-               <Globe2 className="w-6 h-6" />
+          <div className="bg-surface/50 backdrop-blur-sm border border-border rounded-2xl p-6 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow">
+             <div className="p-3.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/20">
+               <Globe2 className="w-7 h-7" />
              </div>
              <div>
-               <p className="text-sm text-muted">Avg. Latency</p>
-               <p className="text-2xl font-bold text-text">{avgLatency} <span className="text-sm font-normal text-muted">ms</span></p>
+               <p className="text-sm font-medium text-muted uppercase tracking-wider">Avg. Latency</p>
+               <div className="flex items-baseline gap-2">
+                 <p className="text-3xl font-bold text-text">{avgLatency}</p>
+                 <span className="text-sm font-medium text-muted">ms</span>
+               </div>
              </div>
           </div>
-          <div className="bg-surface border border-border rounded-xl p-5 flex items-center gap-4 shadow-sm">
-             <div className="p-3 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400">
-               <Info className="w-6 h-6" />
+          <div className="bg-surface/50 backdrop-blur-sm border border-border rounded-2xl p-6 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow">
+             <div className="p-3.5 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 ring-1 ring-purple-500/20">
+               <Info className="w-7 h-7" />
              </div>
              <div>
-               <p className="text-sm text-muted">Network Mode</p>
-               <p className="text-lg font-bold text-text">Proxy Detection</p>
+               <p className="text-sm font-medium text-muted uppercase tracking-wider">Network Mode</p>
+               <div className="flex items-baseline gap-2">
+                 <p className="text-lg font-bold text-text">Browser Proxy</p>
+               </div>
              </div>
           </div>
         </div>
 
         {/* Grouped Sections */}
-        <div className="space-y-12">
+        <div className="space-y-10">
           {categoryOrder.map(category => {
             const categorySites = groupedSites[category];
             if (!categorySites) return null;
 
             return (
-              <div key={category}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="h-px flex-1 bg-border"></div>
-                  <h2 className="text-lg font-semibold text-muted uppercase tracking-wider flex items-center gap-2">
-                    {category === 'AI' && <Layers className="w-4 h-4" />}
-                    {category} Services
+              <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="flex items-center gap-3 mb-5">
+                  <h2 className="text-lg font-bold text-text flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-lg border border-border/50 backdrop-blur-sm">
+                    {category === 'AI' && <Layers className="w-4 h-4 text-primary" />}
+                    {category}
                   </h2>
-                  <div className="h-px flex-1 bg-border"></div>
+                  <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                   {categorySites.map((site) => (
                     <StatusCard
                       key={site.id}
@@ -205,15 +243,14 @@ export default function App() {
           
           {/* Render any categories not in the explicit order list */}
           {Object.keys(groupedSites).filter(cat => !categoryOrder.includes(cat)).map(category => (
-             <div key={category}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="h-px flex-1 bg-border"></div>
-                  <h2 className="text-lg font-semibold text-muted uppercase tracking-wider">
+             <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="flex items-center gap-3 mb-5">
+                   <h2 className="text-lg font-bold text-text flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-lg border border-border/50 backdrop-blur-sm">
                     {category}
                   </h2>
-                  <div className="h-px flex-1 bg-border"></div>
+                  <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                   {groupedSites[category].map((site) => (
                     <StatusCard
                       key={site.id}
@@ -229,10 +266,13 @@ export default function App() {
 
       </main>
 
-      <footer className="py-8 border-t border-border mt-auto bg-surface/50">
-        <div className="max-w-7xl mx-auto px-4 text-center text-muted text-sm">
-          <p>© {new Date().getFullYear()} TongLeMa (tonglema.com). Testing from your local browser.</p>
-          <p className="mt-2 opacity-60">Latency values are estimates based on HTTP headers retrieval time.</p>
+      <footer className="py-10 border-t border-border mt-auto bg-surface/30 backdrop-blur-lg">
+        <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
+          <p className="text-sm font-medium text-text">© {new Date().getFullYear()} TongLeMa</p>
+          <p className="text-xs text-muted max-w-md mx-auto leading-relaxed">
+            Real-time connectivity dashboard. Checks are performed directly from your browser via encrypted HEAD requests. 
+            Latency times may include browser processing overhead.
+          </p>
         </div>
       </footer>
     </div>
