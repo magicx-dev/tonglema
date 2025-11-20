@@ -10,9 +10,21 @@ import { Shield, Globe2, Info, Layers, Lock } from 'lucide-react';
 export default function App() {
   const [results, setResults] = useState<CheckResultMap>({});
   const [isChecking, setIsChecking] = useState(false);
-  const [lastChecked, setLastChecked] = useState<number | null>(null);
+  
+  // Initialize lastChecked from localStorage
+  const [lastChecked, setLastChecked] = useState<number | null>(() => {
+    const saved = localStorage.getItem('lastChecked');
+    return saved ? parseInt(saved, 10) : null;
+  });
+
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-  const [refreshInterval, setRefreshInterval] = useState<number>(0); // 0 = off
+  
+  // Initialize refreshInterval from localStorage
+  const [refreshInterval, setRefreshInterval] = useState<number>(() => {
+    const saved = localStorage.getItem('refreshInterval');
+    return saved ? parseInt(saved, 10) : 0;
+  }); 
+
   const [lang, setLang] = useState<Language>('en');
 
   // Initialize theme and language
@@ -46,6 +58,17 @@ export default function App() {
       }
     }
   }, []);
+
+  // Persist settings to localStorage
+  useEffect(() => {
+    localStorage.setItem('refreshInterval', refreshInterval.toString());
+  }, [refreshInterval]);
+
+  useEffect(() => {
+    if (lastChecked) {
+      localStorage.setItem('lastChecked', lastChecked.toString());
+    }
+  }, [lastChecked]);
 
   // Toggle Language
   const toggleLang = useCallback(() => {
@@ -143,6 +166,9 @@ export default function App() {
 
   // Run check on mount
   useEffect(() => {
+    // If we have cached results or it's the first load, run a check
+    // But we don't want to aggressive check if we just refreshed and have valid data?
+    // For now, simplicity: always check on mount to ensure freshness.
     handleCheckAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -299,8 +325,8 @@ export default function App() {
           
           <div className="h-px w-12 bg-border/50 my-2"></div>
 
-          <p className="text-sm font-medium text-text">
-            © 2023-2025 <span className="font-bold text-primary">Magicx.dev</span>
+          <p className="text-[10px] text-muted/40">
+            © 2023-2025 <span className="font-medium text-muted/60 hover:text-primary transition-colors cursor-default">Magicx.dev</span>
           </p>
         </div>
       </footer>
