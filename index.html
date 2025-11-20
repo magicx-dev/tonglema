@@ -1,8 +1,22 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- 在页面渲染前立即设置主题，防止频闪 -->
+    <script>
+      (function() {
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
     
     <title>TongLeMa (通了吗) - ChatGPT/Google/YouTube 代理网络状态与延迟检测</title>
     <meta name="description" content="TongLeMa.com (通了吗) 实时检测您的代理网络连通性和延迟。彩色网格热力图，一秒判断 Google, ChatGPT, YouTube, Netflix 状态。告别节点盲猜。" />

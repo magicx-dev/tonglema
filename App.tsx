@@ -19,7 +19,15 @@ export default function App() {
     return saved ? parseInt(saved, 10) : null;
   });
 
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  // Initialize theme from localStorage or system preference
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return savedTheme || (systemPrefersDark ? 'dark' : 'light');
+    }
+    return 'dark';
+  });
   
   // Initialize refreshInterval from localStorage
   const [refreshInterval, setRefreshInterval] = useState<number>(() => {
@@ -27,37 +35,34 @@ export default function App() {
     return saved ? parseInt(saved, 10) : 0;
   }); 
 
-  const [lang, setLang] = useState<Language>('en');
+  // Initialize language from localStorage or browser preference
+  const [lang, setLang] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const savedLang = localStorage.getItem('lang') as Language | null;
+      if (savedLang) {
+        return savedLang;
+      } else {
+        const browserLang = navigator.language || 'en';
+        return browserLang.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+      }
+    }
+    return 'en';
+  });
 
-  // Initialize theme and language
+  // Sync theme state with DOM (主题已在 HTML 脚本中设置，这里确保状态同步)
   useEffect(() => {
-    // Theme initialization
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const currentTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
     
-    if (savedTheme) {
-      setTheme(savedTheme);
-      if (savedTheme === 'dark') document.documentElement.classList.add('dark');
-      else document.documentElement.classList.remove('dark');
-    } else if (systemPrefersDark) {
-      setTheme('dark');
+    // 确保状态与 DOM 一致
+    setTheme(currentTheme);
+    
+    // 确保 DOM 类与状态一致（双重保险）
+    if (currentTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
-      setTheme('light');
       document.documentElement.classList.remove('dark');
-    }
-
-    // Language initialization
-    const savedLang = localStorage.getItem('lang') as Language | null;
-    if (savedLang) {
-      setLang(savedLang);
-    } else {
-      const browserLang = navigator.language || 'en';
-      if (browserLang.toLowerCase().startsWith('zh')) {
-        setLang('zh');
-      } else {
-        setLang('en');
-      }
     }
   }, []);
 
