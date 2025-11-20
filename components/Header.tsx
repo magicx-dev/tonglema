@@ -66,6 +66,16 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Controls Section */}
         <div className="flex items-center gap-3 w-full md:w-auto justify-end">
           
+          {/* Last Checked Display */}
+          {lastChecked && (
+             <div className="hidden sm:flex flex-col items-end mr-2 px-3 border-r border-border/50">
+                <span className="text-[10px] text-muted font-medium uppercase tracking-wider">Last Update</span>
+                <span className="text-xs font-mono font-bold text-text tabular-nums">
+                   {new Date(lastChecked).toLocaleTimeString()}
+                </span>
+             </div>
+          )}
+
           {/* Auto Refresh Dropdown */}
           <div className="relative group flex items-center">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-muted">
