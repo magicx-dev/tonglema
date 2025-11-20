@@ -8,7 +8,7 @@ import { TRANSLATIONS } from '../constants';
 interface StatusCardProps {
   site: SiteConfig;
   result?: CheckResult;
-  onCheck: (id: string, url: string) => void;
+  onCheck: (site: SiteConfig) => void;
   lang: Language;
 }
 
@@ -83,26 +83,26 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
 
   const styles = getStatusStyles();
 
-  const faviconUrl = useMemo(() => {
+  const displayIconUrl = useMemo(() => {
+    if (site.iconUrl) return site.iconUrl;
     try {
       const urlObj = new URL(site.url);
       return `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=128`;
     } catch (e) {
       return '';
     }
-  }, [site.url]);
+  }, [site.url, site.iconUrl]);
 
   const latencyPercent = Math.min((latency / 1000) * 100, 100);
 
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, scale: 1.01 }}
       transition={{ duration: 0.2 }}
       className={`
-        relative group overflow-hidden
+        relative group overflow-hidden will-change-transform
         rounded-2xl border ${styles.border} ${styles.bg} ${styles.glow}
         transition-all duration-300 flex flex-col h-[120px]
       `}
@@ -112,11 +112,24 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
           {/* Icon Container */}
           <div className="relative p-2 rounded-xl bg-background/50 border border-border/50 shadow-sm backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
             <img 
-              src={faviconUrl} 
+              src={displayIconUrl} 
               alt={`${displayName} icon`} 
               className="w-8 h-8 object-contain rounded-sm"
               onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
+                // Fallback to Google's service if custom icon fails, or hide if google fails
+                const target = e.target as HTMLImageElement;
+                if (!site.iconUrl && target.src.includes('google.com')) {
+                   target.style.display = 'none';
+                } else if (site.iconUrl && target.src === site.iconUrl) {
+                   // If custom icon failed, try google fallback
+                   try {
+                     target.src = `https://www.google.com/s2/favicons?domain=${new URL(site.url).hostname}&sz=128`;
+                   } catch {
+                     target.style.display = 'none';
+                   }
+                } else {
+                   target.style.display = 'none';
+                }
               }}
             />
           </div>
@@ -186,7 +199,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
 
       {/* Click Overlay */}
       <button
-        onClick={() => onCheck(site.id, site.url)}
+        onClick={() => onCheck(site)}
         className="absolute inset-0 w-full h-full z-20 cursor-pointer outline-none"
         aria-label={`${t.check_again} ${displayName}`}
       />

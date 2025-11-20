@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
 import { StatusCard } from './components/StatusCard';
@@ -68,22 +69,22 @@ export default function App() {
   }, [theme]);
 
   // Function to check a single site
-  const handleCheckSite = useCallback(async (id: string, url: string) => {
+  const handleCheckSite = useCallback(async (site: SiteConfig) => {
     setResults(prev => ({
       ...prev,
-      [id]: {
-        siteId: id,
+      [site.id]: {
+        siteId: site.id,
         status: ConnectivityStatus.PENDING,
         latency: 0,
         timestamp: Date.now()
       }
     }));
 
-    const result = await checkConnectivity(id, url);
+    const result = await checkConnectivity(site);
     
     setResults(prev => ({
       ...prev,
-      [id]: result
+      [site.id]: result
     }));
   }, []);
 
@@ -114,7 +115,7 @@ export default function App() {
     const batchSize = 6; 
     for (let i = 0; i < SITES.length; i += batchSize) {
       const batch = SITES.slice(i, i + batchSize);
-      const promises = batch.map(site => checkConnectivity(site.id, site.url));
+      const promises = batch.map(site => checkConnectivity(site));
       const batchResults = await Promise.all(promises);
       
       setResults(prev => {

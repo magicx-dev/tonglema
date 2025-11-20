@@ -1,3 +1,4 @@
+
 import { SiteConfig, Language } from './types';
 
 export const SITES: SiteConfig[] = [
@@ -113,6 +114,7 @@ export const SITES: SiteConfig[] = [
     name: 'Stack Overflow',
     name_zh: 'Stack Overflow',
     url: 'https://stackoverflow.com',
+    iconUrl: 'https://stackoverflow.com/Content/Sites/stackoverflow/Img/favicon.ico',
     category: 'Dev',
   },
   {

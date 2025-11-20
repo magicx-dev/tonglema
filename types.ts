@@ -6,6 +6,7 @@ export interface SiteConfig {
   name: string;
   name_zh?: string; // Chinese name
   url: string;
+  iconUrl?: string; // Custom URL for favicon/icon detection and display
   category: 'Search' | 'Social' | 'AI' | 'Media' | 'Dev' | 'Other';
   description?: string;
   description_zh?: string; // Chinese description

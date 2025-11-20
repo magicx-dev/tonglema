@@ -1,4 +1,5 @@
-import { CheckResult, ConnectivityStatus } from '../types';
+
+import { CheckResult, ConnectivityStatus, SiteConfig } from '../types';
 
 const TIMEOUT_MS = 5000;
 
@@ -33,27 +34,28 @@ const fetchUrl = async (url: string, method: string = 'GET', timeout: number = T
 /**
  * Checks connectivity to a site.
  * Strategy (Updated):
- * 1. Try GET request to /favicon.ico (Preferred: lighter, often whitelisted).
+ * 1. Try GET request to Custom Icon URL (if provided) OR /favicon.ico (Preferred: lighter, often whitelisted).
  * 2. If fails, Try GET request to root URL (Fallback). 
- *    Note: We use GET instead of HEAD for fallback because many WAFs (like StackOverflow's) 
- *    block HEAD requests to root, but allow GET.
  */
-export const checkConnectivity = async (siteId: string, url: string): Promise<CheckResult> => {
+export const checkConnectivity = async (site: SiteConfig): Promise<CheckResult> => {
   // Construct Favicon URL
-  let faviconUrl = '';
-  try {
-    const urlObj = new URL(url);
-    faviconUrl = `${urlObj.origin}/favicon.ico`;
-  } catch (e) {
-    // Fallback if URL parsing fails
-    faviconUrl = url; 
+  let targetIconUrl = site.iconUrl;
+
+  // If no custom icon provided, try to guess standard favicon location
+  if (!targetIconUrl) {
+    try {
+      const urlObj = new URL(site.url);
+      targetIconUrl = `${urlObj.origin}/favicon.ico`;
+    } catch (e) {
+      targetIconUrl = site.url; 
+    }
   }
 
   try {
-    // Attempt 1: Favicon Check (GET)
-    const latency = await fetchUrl(faviconUrl, 'GET', 4000);
+    // Attempt 1: Favicon/Icon Check (GET)
+    const latency = await fetchUrl(targetIconUrl, 'GET', 4000);
     return {
-      siteId,
+      siteId: site.id,
       status: ConnectivityStatus.SUCCESS,
       latency,
       timestamp: Date.now(),
@@ -64,9 +66,9 @@ export const checkConnectivity = async (siteId: string, url: string): Promise<Ch
     try {
       // Attempt 2: Root URL Check (GET)
       // Using GET increases success rate against WAFs compared to HEAD
-      const latency = await fetchUrl(url, 'GET', TIMEOUT_MS);
+      const latency = await fetchUrl(site.url, 'GET', TIMEOUT_MS);
       return {
-        siteId,
+        siteId: site.id,
         status: ConnectivityStatus.SUCCESS,
         latency,
         timestamp: Date.now(),
@@ -80,7 +82,7 @@ export const checkConnectivity = async (siteId: string, url: string): Promise<Ch
       }
 
       return {
-        siteId,
+        siteId: site.id,
         status,
         latency: 0,
         timestamp: Date.now(),
