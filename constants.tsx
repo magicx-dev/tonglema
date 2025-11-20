@@ -1,4 +1,3 @@
-
 import { SiteConfig, Language } from './types';
 
 export const SITES: SiteConfig[] = [
@@ -136,7 +135,8 @@ export const TRANSLATIONS = {
     avg_latency: 'Avg. Latency',
     network_mode: 'Network Mode',
     browser_proxy: 'Browser Proxy',
-    footer_text: 'Real-time connectivity dashboard. Checks are performed directly from your browser via encrypted HEAD requests.',
+    footer_text: 'This tool runs 100% in your browser using the Fetch API (HEAD/GET). No user data is collected or sent to any backend server. The status reflects your current local network environment.',
+    privacy_badge: 'Privacy First • No Tracking',
     status_pinging: 'Pinging...',
     status_unreachable: 'Unreachable',
     status_timeout: 'Timeout',
@@ -162,7 +162,8 @@ export const TRANSLATIONS = {
     avg_latency: '平均延迟',
     network_mode: '检测模式',
     browser_proxy: '浏览器/代理',
-    footer_text: '实时连通性仪表盘。检测直接通过您的浏览器发起（加密 HEAD 请求），结果反映您当前的本地网络环境。',
+    footer_text: '本工具基于浏览器 Fetch API (HEAD/GET) 在本地运行。不收集任何用户数据，也不会向后台发送日志。检测结果仅反映您当前的本地网络环境。',
+    privacy_badge: '隐私优先 • 无追踪',
     status_pinging: '检测中...',
     status_unreachable: '无法访问',
     status_timeout: '连接超时',

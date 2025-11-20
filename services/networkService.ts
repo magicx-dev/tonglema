@@ -3,34 +3,43 @@ import { CheckResult, ConnectivityStatus } from '../types';
 const TIMEOUT_MS = 5000;
 
 /**
- * Checks connectivity to a specific URL.
- * 
- * NOTE: We use mode: 'no-cors'. This means we cannot read the status code (200 vs 404 vs 500).
- * However, if the promise resolves, it means we successfully established a connection and got *some* response.
- * If it rejects, it's usually a network error (DNS failure, blocked connection, timeout).
+ * Helper function to perform a single fetch request
  */
-export const checkConnectivity = async (siteId: string, url: string): Promise<CheckResult> => {
+const fetchUrl = async (url: string, method: string = 'HEAD', timeout: number = TIMEOUT_MS): Promise<number> => {
   const start = performance.now();
-  
-  // Add a timestamp to bypass browser caching
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  // Add timestamp to bypass cache
   const cacheBuster = url.includes('?') ? `&_t=${Date.now()}` : `?_t=${Date.now()}`;
   const targetUrl = `${url}${cacheBuster}`;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
   try {
     await fetch(targetUrl, {
-      method: 'HEAD', // Try HEAD first to be lighter, though some servers reject it.
+      method,
       mode: 'no-cors',
       cache: 'no-store',
       signal: controller.signal,
     });
-    
     clearTimeout(timeoutId);
     const end = performance.now();
-    const latency = Math.round(end - start);
+    return Math.round(end - start);
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+};
 
+/**
+ * Checks connectivity to a site.
+ * Strategy:
+ * 1. Try HEAD request to root URL (Fastest, lightweight).
+ * 2. If fails, Try GET request to /favicon.ico (Fallback, better compatibility).
+ */
+export const checkConnectivity = async (siteId: string, url: string): Promise<CheckResult> => {
+  try {
+    // Attempt 1: Standard Root Check (HEAD)
+    const latency = await fetchUrl(url, 'HEAD', TIMEOUT_MS);
     return {
       siteId,
       status: ConnectivityStatus.SUCCESS,
@@ -38,18 +47,46 @@ export const checkConnectivity = async (siteId: string, url: string): Promise<Ch
       timestamp: Date.now(),
     };
   } catch (error: any) {
-    clearTimeout(timeoutId);
+    // If first attempt failed due to Abort (Timeout), return timeout immediately.
+    // If it failed due to network error/CORS rejection, try fallback.
     
-    let status = ConnectivityStatus.ERROR;
-    if (error.name === 'AbortError') {
-      status = ConnectivityStatus.TIMEOUT;
+    // Construct Favicon URL for fallback
+    let fallbackUrl = '';
+    try {
+      const urlObj = new URL(url);
+      fallbackUrl = `${urlObj.origin}/favicon.ico`;
+    } catch (e) {
+      // If URL parsing fails, cannot do fallback
+      return {
+        siteId,
+        status: ConnectivityStatus.ERROR,
+        latency: 0,
+        timestamp: Date.now(),
+      };
     }
 
-    return {
-      siteId,
-      status,
-      latency: 0,
-      timestamp: Date.now(),
-    };
+    try {
+      // Attempt 2: Favicon Fallback (GET)
+      // We give it a slightly shorter timeout for the fallback to keep UI snappy
+      const latency = await fetchUrl(fallbackUrl, 'GET', 4000);
+      return {
+        siteId,
+        status: ConnectivityStatus.SUCCESS,
+        latency,
+        timestamp: Date.now(),
+      };
+    } catch (fallbackError: any) {
+      let status = ConnectivityStatus.ERROR;
+      if (fallbackError.name === 'AbortError' || error.name === 'AbortError') {
+        status = ConnectivityStatus.TIMEOUT;
+      }
+
+      return {
+        siteId,
+        status,
+        latency: 0,
+        timestamp: Date.now(),
+      };
+    }
   }
 };

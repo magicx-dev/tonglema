@@ -1,11 +1,10 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
 import { StatusCard } from './components/StatusCard';
 import { SITES, TRANSLATIONS } from './constants';
 import { checkConnectivity } from './services/networkService';
 import { CheckResult, ConnectivityStatus, CheckResultMap, SiteConfig, Language } from './types';
-import { Shield, Globe2, Info, Layers } from 'lucide-react';
+import { Shield, Globe2, Info, Layers, Lock } from 'lucide-react';
 
 export default function App() {
   const [results, setResults] = useState<CheckResultMap>({});
@@ -98,12 +97,15 @@ export default function App() {
     setResults(prev => {
       const next = { ...prev };
       SITES.forEach(site => {
-        next[site.id] = {
-          ...(next[site.id] || { latency: 0 }),
-          siteId: site.id,
-          status: ConnectivityStatus.PENDING,
-          timestamp: Date.now()
-        };
+        // Only mark as pending if not already successful to avoid flashing
+        if (!next[site.id] || next[site.id].status === ConnectivityStatus.IDLE) {
+           next[site.id] = {
+            ...(next[site.id] || { latency: 0 }),
+            siteId: site.id,
+            status: ConnectivityStatus.PENDING,
+            timestamp: Date.now()
+          };
+        }
       });
       return next;
     });
@@ -284,10 +286,20 @@ export default function App() {
       </main>
 
       <footer className="py-10 border-t border-border mt-auto bg-surface/30 backdrop-blur-lg">
-        <div className="max-w-7xl mx-auto px-4 text-center space-y-2">
-          <p className="text-sm font-medium text-text">© {new Date().getFullYear()} {t.app_title}</p>
-          <p className="text-xs text-muted max-w-md mx-auto leading-relaxed">
+        <div className="max-w-7xl mx-auto px-4 text-center flex flex-col items-center gap-4">
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-surface border border-border shadow-sm">
+             <Lock className="w-3 h-3 text-success" />
+             <span className="text-[10px] font-semibold text-muted uppercase tracking-widest">{t.privacy_badge}</span>
+          </div>
+          
+          <p className="text-xs text-muted/80 max-w-2xl mx-auto leading-relaxed">
             {t.footer_text}
+          </p>
+          
+          <div className="h-px w-12 bg-border/50 my-2"></div>
+
+          <p className="text-sm font-medium text-text">
+            © 2023-2025 <span className="font-bold text-primary">Magicx.dev</span>
           </p>
         </div>
       </footer>
