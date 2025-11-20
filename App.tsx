@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Header } from './components/Header';
 import { StatusCard } from './components/StatusCard';
 import { SITES, TRANSLATIONS } from './constants';
@@ -7,11 +7,16 @@ import { checkConnectivity } from './services/networkService';
 import { CheckResult, ConnectivityStatus, CheckResultMap, SiteConfig, Language } from './types';
 import { Shield, Globe2, Info, Layers, Lock, Github } from 'lucide-react';
 
+// 将常量移到组件外部，避免每次渲染都重新创建
+const CATEGORY_ORDER = ['AI', 'Search', 'Social', 'Media', 'Dev'];
+
 export default function App() {
   const [results, setResults] = useState<CheckResultMap>({});
   const [isChecking, setIsChecking] = useState(false);
   // Track which sites are currently refreshing to avoid clearing their data (prevent flicker)
   const [refreshingIds, setRefreshingIds] = useState<Set<string>>(new Set());
+  // 使用 ref 跟踪检查状态，避免 handleCheckAll 依赖变化
+  const isCheckingRef = useRef(false);
   
   // Initialize lastChecked from localStorage
   const [lastChecked, setLastChecked] = useState<number | null>(() => {
@@ -166,8 +171,9 @@ export default function App() {
 
   // Function to check all sites
   const handleCheckAll = useCallback(async () => {
-    if (isChecking) return;
+    if (isCheckingRef.current) return;
     
+    isCheckingRef.current = true;
     setIsChecking(true);
     setLastChecked(Date.now());
 
@@ -214,9 +220,10 @@ export default function App() {
       });
     }
 
+    isCheckingRef.current = false;
     setIsChecking(false);
     setRefreshingIds(new Set()); // Ensure cleanup
-  }, [isChecking]);
+  }, []);
 
   // Auto Refresh Effect
   useEffect(() => {
@@ -235,29 +242,34 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Calculate overview stats
-  const stats = Object.values(results).reduce<{ online: number; offline: number; avgLatency: number; count: number }>((acc, curr) => {
-    if (curr.status === ConnectivityStatus.SUCCESS) acc.online++;
-    if (curr.status === ConnectivityStatus.ERROR || curr.status === ConnectivityStatus.TIMEOUT) acc.offline++;
-    if (curr.latency > 0) {
-      acc.avgLatency += curr.latency;
-      acc.count++;
-    }
-    return acc;
-  }, { online: 0, offline: 0, avgLatency: 0, count: 0 });
+  // 使用 useMemo 缓存统计计算结果，只在 results 变化时重新计算
+  const stats = useMemo(() => {
+    return Object.values(results).reduce<{ online: number; offline: number; avgLatency: number; count: number }>((acc, curr) => {
+      if (curr.status === ConnectivityStatus.SUCCESS) acc.online++;
+      if (curr.status === ConnectivityStatus.ERROR || curr.status === ConnectivityStatus.TIMEOUT) acc.offline++;
+      if (curr.latency > 0) {
+        acc.avgLatency += curr.latency;
+        acc.count++;
+      }
+      return acc;
+    }, { online: 0, offline: 0, avgLatency: 0, count: 0 });
+  }, [results]);
   
-  const avgLatency = stats.count > 0 ? Math.round(stats.avgLatency / stats.count) : 0;
+  const avgLatency = useMemo(() => {
+    return stats.count > 0 ? Math.round(stats.avgLatency / stats.count) : 0;
+  }, [stats]);
 
-  // Group sites by category
-  const groupedSites = SITES.reduce<Record<string, SiteConfig[]>>((acc, site) => {
-    if (!acc[site.category]) acc[site.category] = [];
-    acc[site.category].push(site);
-    return acc;
-  }, {});
+  // 使用 useMemo 缓存分组结果，SITES 是常量，只在首次渲染时计算
+  const groupedSites = useMemo(() => {
+    return SITES.reduce<Record<string, SiteConfig[]>>((acc, site) => {
+      if (!acc[site.category]) acc[site.category] = [];
+      acc[site.category].push(site);
+      return acc;
+    }, {});
+  }, []);
 
-  // Define category order
-  const categoryOrder = ['AI', 'Search', 'Social', 'Media', 'Dev'];
-  const t = TRANSLATIONS[lang];
+  // 使用 useMemo 缓存翻译对象
+  const t = useMemo(() => TRANSLATIONS[lang], [lang]);
 
   return (
     <div className="min-h-screen bg-background text-text flex flex-col transition-colors duration-500">
@@ -316,7 +328,7 @@ export default function App() {
 
         {/* Grouped Sections */}
         <div className="space-y-10">
-          {categoryOrder.map(category => {
+          {CATEGORY_ORDER.map(category => {
             const categorySites = groupedSites[category];
             if (!categorySites) return null;
 
@@ -350,7 +362,7 @@ export default function App() {
           })}
           
           {/* Render any categories not in the explicit order list */}
-          {Object.keys(groupedSites).filter(cat => !categoryOrder.includes(cat)).map(category => (
+          {Object.keys(groupedSites).filter(cat => !CATEGORY_ORDER.includes(cat)).map(category => (
              <div key={category} className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <div className="flex items-center gap-3 mb-5">
                    <h2 className="text-lg font-bold text-text flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-lg border border-border/50 backdrop-blur-sm">

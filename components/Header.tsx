@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { Activity, Play, RefreshCw, Sun, Moon, Clock, Languages } from 'lucide-react';
 import { Language } from '../types';
 import { TRANSLATIONS } from '../constants';
@@ -25,7 +25,7 @@ const INTERVAL_OPTIONS = [
   { label: '5m', label_zh: '5分', value: 300000 },
 ];
 
-export const Header: React.FC<HeaderProps> = ({ 
+export const Header: React.FC<HeaderProps> = memo(({ 
   onCheckAll, 
   isChecking, 
   lastChecked, 
@@ -36,7 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
   lang,
   toggleLang
 }) => {
-  const t = TRANSLATIONS[lang];
+  const t = useMemo(() => TRANSLATIONS[lang], [lang]);
 
   return (
     <header className="w-full py-4 px-4 md:px-6 border-b border-border bg-background/80 sticky top-0 z-[999] backdrop-blur-xl transition-colors duration-300">
@@ -166,4 +166,4 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
     </header>
   );
-};
+});

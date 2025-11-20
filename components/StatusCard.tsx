@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw, WifiOff, AlertCircle, ExternalLink } from 'lucide-react';
 import { CheckResult, ConnectivityStatus, SiteConfig, Language } from '../types';
@@ -13,10 +13,10 @@ interface StatusCardProps {
   isRefreshing?: boolean;
 }
 
-export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, lang, isRefreshing = false }) => {
+export const StatusCard: React.FC<StatusCardProps> = memo(({ site, result, onCheck, lang, isRefreshing = false }) => {
   const status = result?.status || ConnectivityStatus.IDLE;
   const latency = result?.latency || 0;
-  const t = TRANSLATIONS[lang];
+  const t = useMemo(() => TRANSLATIONS[lang], [lang]);
 
   // Determine display name
   const displayName = (lang === 'zh' && site.name_zh) ? site.name_zh : site.name;
@@ -116,6 +116,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
         relative group overflow-hidden
         rounded-2xl border ${styles.border} ${styles.bg} ${styles.glow}
         transition-all duration-300 flex flex-col h-[120px]
+        z-10
       `}
     >
       {/* Content Wrapper: z-30 + pointer-events-none to sit above button (z-20) but let clicks pass through */}
@@ -210,7 +211,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
       </div>
 
       {/* Latency Bar (Bottom) */}
-      <div className="h-1 w-full bg-black/5 dark:bg-white/5 mt-auto relative">
+      <div className="h-1 w-full bg-black/5 dark:bg-white/5 mt-auto relative overflow-hidden rounded-b-2xl">
         {status === ConnectivityStatus.SUCCESS && (
           <motion.div 
             initial={false}
@@ -229,4 +230,4 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
       />
     </motion.div>
   );
-};
+});
