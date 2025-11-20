@@ -10,9 +10,10 @@ interface StatusCardProps {
   result?: CheckResult;
   onCheck: (site: SiteConfig) => void;
   lang: Language;
+  isRefreshing?: boolean;
 }
 
-export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, lang }) => {
+export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, lang, isRefreshing = false }) => {
   const status = result?.status || ConnectivityStatus.IDLE;
   const latency = result?.latency || 0;
   const t = TRANSLATIONS[lang];
@@ -95,6 +96,16 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
 
   const latencyPercent = Math.min((latency / 1000) * 100, 100);
 
+  // Status Indicator logic:
+  // If refreshing, show spinner in status dot area.
+  // Else show standard dot.
+  const renderStatusIndicator = () => {
+    if (isRefreshing) {
+       return <RefreshCw className={`w-2.5 h-2.5 text-muted animate-spin`} />;
+    }
+    return <div className={`w-2.5 h-2.5 rounded-full ${styles.indicator} shadow-sm ring-2 ring-background/10`} />;
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -150,11 +161,11 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
           </div>
         </div>
 
-        {/* Status Badge */}
+        {/* Status Badge Top Right */}
         <div className="flex flex-col items-end gap-1">
-          <div className={`w-2.5 h-2.5 rounded-full ${styles.indicator} shadow-sm ring-2 ring-background/10`} />
+          {renderStatusIndicator()}
           {status === ConnectivityStatus.SUCCESS && (
-            <span className={`text-xs font-mono font-bold ${styles.text}`}>
+            <span className={`text-xs font-mono font-bold ${styles.text} ${isRefreshing ? 'opacity-50' : ''}`}>
               {latency}ms
             </span>
           )}
@@ -163,25 +174,34 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
 
       {/* Middle Status/Action Area */}
       <div className="px-4 pb-3 relative z-10">
-         {status === ConnectivityStatus.PENDING && (
+         {(status === ConnectivityStatus.PENDING || (status === ConnectivityStatus.IDLE && isRefreshing)) && (
            <div className="flex items-center gap-2 text-xs text-primary animate-pulse">
              <RefreshCw className="w-3 h-3 animate-spin" />
              <span>{t.status_pinging}</span>
            </div>
          )}
-         {status === ConnectivityStatus.ERROR && (
+         
+         {status === ConnectivityStatus.ERROR && !isRefreshing && (
            <div className="flex items-center gap-2 text-xs text-danger">
              <WifiOff className="w-3 h-3" />
              <span>{t.status_unreachable}</span>
            </div>
          )}
-         {status === ConnectivityStatus.TIMEOUT && (
+         {status === ConnectivityStatus.TIMEOUT && !isRefreshing && (
            <div className="flex items-center gap-2 text-xs text-yellow-600 dark:text-yellow-500">
              <AlertCircle className="w-3 h-3" />
              <span>{t.status_timeout}</span>
            </div>
          )}
-         {status === ConnectivityStatus.IDLE && (
+         
+         {(status === ConnectivityStatus.ERROR || status === ConnectivityStatus.TIMEOUT) && isRefreshing && (
+            <div className="flex items-center gap-2 text-xs text-muted animate-pulse">
+               <RefreshCw className="w-3 h-3 animate-spin" />
+               <span>{t.status_pinging}</span>
+            </div>
+         )}
+
+         {status === ConnectivityStatus.IDLE && !isRefreshing && (
            <div className="text-xs text-muted/50">{t.status_waiting}</div>
          )}
       </div>
@@ -190,8 +210,9 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
       <div className="h-1 w-full bg-black/5 dark:bg-white/5 mt-auto relative">
         {status === ConnectivityStatus.SUCCESS && (
           <motion.div 
-            initial={{ width: 0 }}
-            animate={{ width: `${latencyPercent}%` }}
+            initial={false}
+            animate={{ width: `${latencyPercent}%`, opacity: isRefreshing ? 0.5 : 1 }}
+            transition={{ duration: 0.5 }}
             className={`h-full ${latency < 200 ? 'bg-green-500' : latency < 500 ? 'bg-green-400' : latency < 1000 ? 'bg-yellow-500' : 'bg-orange-500'}`}
           />
         )}
@@ -200,12 +221,9 @@ export const StatusCard: React.FC<StatusCardProps> = ({ site, result, onCheck, l
       {/* Click Overlay */}
       <button
         onClick={() => onCheck(site)}
-        className="absolute inset-0 w-full h-full z-20 cursor-pointer outline-none"
-        aria-label={`${t.check_again} ${displayName}`}
+        className="absolute inset-0 w-full h-full z-20 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-2xl"
+        aria-label={`Check connectivity for ${displayName}`}
       />
-      
-      {/* Background decorative elements */}
-      <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent dark:from-white/5 pointer-events-none rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
     </motion.div>
   );
 };

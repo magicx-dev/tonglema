@@ -10,6 +10,8 @@ import { Shield, Globe2, Info, Layers, Lock } from 'lucide-react';
 export default function App() {
   const [results, setResults] = useState<CheckResultMap>({});
   const [isChecking, setIsChecking] = useState(false);
+  // Track which sites are currently refreshing to avoid clearing their data (prevent flicker)
+  const [refreshingIds, setRefreshingIds] = useState<Set<string>>(new Set());
   
   // Initialize lastChecked from localStorage
   const [lastChecked, setLastChecked] = useState<number | null>(() => {
@@ -93,15 +95,25 @@ export default function App() {
 
   // Function to check a single site
   const handleCheckSite = useCallback(async (site: SiteConfig) => {
-    setResults(prev => ({
-      ...prev,
-      [site.id]: {
-        siteId: site.id,
-        status: ConnectivityStatus.PENDING,
-        latency: 0,
-        timestamp: Date.now()
+    // Mark as refreshing
+    setRefreshingIds(prev => new Set(prev).add(site.id));
+
+    // Only set status to PENDING if we don't have a result yet (first load)
+    // This preserves the old color/result while refreshing, preventing flicker
+    setResults(prev => {
+      if (!prev[site.id]) {
+        return {
+          ...prev,
+          [site.id]: {
+            siteId: site.id,
+            status: ConnectivityStatus.PENDING,
+            latency: 0,
+            timestamp: Date.now()
+          }
+        };
       }
-    }));
+      return prev;
+    });
 
     const result = await checkConnectivity(site);
     
@@ -109,6 +121,13 @@ export default function App() {
       ...prev,
       [site.id]: result
     }));
+
+    // Remove from refreshing
+    setRefreshingIds(prev => {
+      const next = new Set(prev);
+      next.delete(site.id);
+      return next;
+    });
   }, []);
 
   // Function to check all sites
@@ -118,15 +137,19 @@ export default function App() {
     setIsChecking(true);
     setLastChecked(Date.now());
 
+    // Mark all as refreshing
+    setRefreshingIds(new Set(SITES.map(s => s.id)));
+
+    // Initialize IDLE/Missing sites to PENDING visual state
     setResults(prev => {
       const next = { ...prev };
       SITES.forEach(site => {
-        // Only mark as pending if not already successful to avoid flashing
-        if (!next[site.id] || next[site.id].status === ConnectivityStatus.IDLE) {
+        // Only mark as pending if not already existing to avoid flashing
+        if (!next[site.id]) {
            next[site.id] = {
-            ...(next[site.id] || { latency: 0 }),
             siteId: site.id,
             status: ConnectivityStatus.PENDING,
+            latency: 0,
             timestamp: Date.now()
           };
         }
@@ -148,9 +171,17 @@ export default function App() {
         });
         return next;
       });
+
+      // Remove completed batch from refreshing
+      setRefreshingIds(prev => {
+        const next = new Set(prev);
+        batch.forEach(s => next.delete(s.id));
+        return next;
+      });
     }
 
     setIsChecking(false);
+    setRefreshingIds(new Set()); // Ensure cleanup
   }, [isChecking]);
 
   // Auto Refresh Effect
@@ -166,9 +197,6 @@ export default function App() {
 
   // Run check on mount
   useEffect(() => {
-    // If we have cached results or it's the first load, run a check
-    // But we don't want to aggressive check if we just refreshed and have valid data?
-    // For now, simplicity: always check on mount to ensure freshness.
     handleCheckAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -279,6 +307,7 @@ export default function App() {
                       result={results[site.id]}
                       onCheck={handleCheckSite}
                       lang={lang}
+                      isRefreshing={refreshingIds.has(site.id)}
                     />
                   ))}
                 </div>
@@ -303,6 +332,7 @@ export default function App() {
                       result={results[site.id]}
                       onCheck={handleCheckSite}
                       lang={lang}
+                      isRefreshing={refreshingIds.has(site.id)}
                     />
                   ))}
                 </div>
