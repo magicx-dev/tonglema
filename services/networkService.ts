@@ -35,11 +35,11 @@ const fetchUrl = async (url: string, method: string = 'GET', timeout: number = T
 /**
  * Checks connectivity to a site.
  * Strategy (Updated):
- * 1. Try GET request to Custom Icon URL (if provided) OR /favicon.ico (Preferred: lighter, often whitelisted).
- * 2. If fails, Try GET request to root URL (Fallback). 
+ * 1. Try GET request to Root URL (Preferred: represents actual site availability).
+ * 2. If fails, Try GET request to Custom Icon URL or /favicon.ico (Fallback: often different CDN/rules).
  */
 export const checkConnectivity = async (site: SiteConfig): Promise<CheckResult> => {
-  // Construct Favicon URL
+  // Construct Favicon URL for fallback
   let targetIconUrl = site.iconUrl;
 
   // If no custom icon provided, try to guess standard favicon location
@@ -53,9 +53,8 @@ export const checkConnectivity = async (site: SiteConfig): Promise<CheckResult> 
   }
 
   try {
-    // Attempt 1: Favicon/Icon Check (GET)
-    // We use a slightly shorter timeout for the icon check to fail fast to fallback
-    const latency = await fetchUrl(targetIconUrl, 'GET', 3500);
+    // Attempt 1: Root URL Check (GET)
+    const latency = await fetchUrl(site.url, 'GET', TIMEOUT_MS);
     return {
       siteId: site.id,
       status: ConnectivityStatus.SUCCESS,
@@ -63,12 +62,11 @@ export const checkConnectivity = async (site: SiteConfig): Promise<CheckResult> 
       timestamp: Date.now(),
     };
   } catch (error: any) {
-    // If attempt 1 (Favicon) fails, try Attempt 2 (Root URL)
+    // If attempt 1 (Root URL) fails, try Attempt 2 (Favicon)
     
     try {
-      // Attempt 2: Root URL Check (GET)
-      // Using GET increases success rate against WAFs compared to HEAD
-      const latency = await fetchUrl(site.url, 'GET', TIMEOUT_MS);
+      // Attempt 2: Favicon/Icon Check (GET)
+      const latency = await fetchUrl(targetIconUrl, 'GET', 3500);
       return {
         siteId: site.id,
         status: ConnectivityStatus.SUCCESS,
