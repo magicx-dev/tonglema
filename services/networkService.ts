@@ -15,9 +15,10 @@ const fetchUrl = async (url: string, method: string = 'GET', timeout: number = T
     await fetch(url, {
       method,
       mode: 'no-cors',
-      // Use 'reload' to force network request without appending suspicious query params like ?_t=...
+      // 'reload' helps bypass local cache to ensure real network check.
+      // 'no-store' might be even stronger but 'reload' is sufficient for connectivity.
       cache: 'reload', 
-      // Stealth options to reduce WAF blocking (403s)
+      // Stealth options to reduce WAF blocking (403s) and CORP issues where possible
       credentials: 'omit', 
       referrerPolicy: 'no-referrer',
       signal: controller.signal,
@@ -53,7 +54,8 @@ export const checkConnectivity = async (site: SiteConfig): Promise<CheckResult> 
 
   try {
     // Attempt 1: Favicon/Icon Check (GET)
-    const latency = await fetchUrl(targetIconUrl, 'GET', 4000);
+    // We use a slightly shorter timeout for the icon check to fail fast to fallback
+    const latency = await fetchUrl(targetIconUrl, 'GET', 3500);
     return {
       siteId: site.id,
       status: ConnectivityStatus.SUCCESS,

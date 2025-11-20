@@ -114,7 +114,8 @@ export const SITES: SiteConfig[] = [
     name: 'Stack Overflow',
     name_zh: 'Stack Overflow',
     url: 'https://stackoverflow.com',
-    iconUrl: 'https://stackoverflow.com/Content/Sites/stackoverflow/Img/favicon.ico',
+    // Use cdn.sstatic.net to bypass CORP 'same-origin' policy on the main site
+    iconUrl: 'https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico', 
     category: 'Dev',
   },
   {
