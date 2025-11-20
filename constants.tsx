@@ -174,6 +174,11 @@ export const TRANSLATIONS = {
       Media: 'Media',
       Dev: 'Dev',
       Other: 'Other'
+    },
+    meta: {
+      title: 'TongLeMa - Network Connectivity & Proxy Latency Test',
+      description: 'Real-time network connectivity monitor. Check latency for ChatGPT, Google, YouTube, and more instantly. Visualize your proxy performance.',
+      keywords: 'connectivity check, network latency, proxy speed test, ping tool, chatgpt status, internet availability'
     }
   },
   zh: {
@@ -201,6 +206,11 @@ export const TRANSLATIONS = {
       Media: '流媒体',
       Dev: '开发工具',
       Other: '其他'
+    },
+    meta: {
+      title: 'TongLeMa (通了吗) - ChatGPT/Google/YouTube 代理网络状态与延迟检测',
+      description: 'TongLeMa.com (通了吗) 实时检测您的代理网络连通性和延迟。彩色网格热力图，一秒判断 Google, ChatGPT, YouTube, Netflix 状态。告别节点盲猜。',
+      keywords: '代理网络连通性检测, ChatGPT 节点测试, 代理速度查看, 科学上网状态查询, IP 纯净度, tonglema, 通了吗, 翻墙测试, 延迟检测'
     }
   }
 };

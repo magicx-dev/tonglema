@@ -61,6 +61,35 @@ export default function App() {
     }
   }, []);
 
+  // SEO: Update Document Title and Meta Tags when language changes
+  useEffect(() => {
+    const t = TRANSLATIONS[lang];
+    if (t.meta) {
+      document.title = t.meta.title;
+      
+      const updateMeta = (name: string, content: string) => {
+        let element = document.querySelector(`meta[name="${name}"]`);
+        if (element) {
+          element.setAttribute('content', content);
+        }
+      };
+
+      updateMeta('description', t.meta.description);
+      updateMeta('keywords', t.meta.keywords);
+      
+      // Also update OG tags
+      const updateOgMeta = (property: string, content: string) => {
+        let element = document.querySelector(`meta[property="${property}"]`);
+        if (element) {
+          element.setAttribute('content', content);
+        }
+      };
+
+      updateOgMeta('og:title', t.meta.title);
+      updateOgMeta('og:description', t.meta.description);
+    }
+  }, [lang]);
+
   // Persist settings to localStorage
   useEffect(() => {
     localStorage.setItem('refreshInterval', refreshInterval.toString());
