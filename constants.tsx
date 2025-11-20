@@ -3,11 +3,11 @@ import { SiteConfig, Language } from './types';
 
 export const SITES: SiteConfig[] = [
   {
-    id: 'google',
-    name: 'Google',
-    name_zh: '谷歌',
-    url: 'https://www.google.com',
-    category: 'Search',
+    id: 'chatgpt',
+    name: 'ChatGPT',
+    name_zh: 'ChatGPT',
+    url: 'https://chatgpt.com',
+    category: 'AI',
   },
   {
     id: 'gemini',
@@ -17,13 +17,6 @@ export const SITES: SiteConfig[] = [
     category: 'AI',
     description: 'Google Advanced AI',
     description_zh: '谷歌最强 AI 模型'
-  },
-  {
-    id: 'chatgpt',
-    name: 'ChatGPT',
-    name_zh: 'ChatGPT',
-    url: 'https://chatgpt.com',
-    category: 'AI',
   },
   {
     id: 'claude',
@@ -59,6 +52,13 @@ export const SITES: SiteConfig[] = [
     name_zh: 'Midjourney',
     url: 'https://www.midjourney.com',
     category: 'AI',
+  },
+  {
+    id: 'google',
+    name: 'Google',
+    name_zh: '谷歌',
+    url: 'https://www.google.com',
+    category: 'Search',
   },
   {
     id: 'youtube',

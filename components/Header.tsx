@@ -18,6 +18,7 @@ interface HeaderProps {
 
 const INTERVAL_OPTIONS = [
   { label: 'Manual', label_zh: '手动', value: 0 },
+  { label: '3s', label_zh: '3秒', value: 3000 },
   { label: '10s', label_zh: '10秒', value: 10000 },
   { label: '30s', label_zh: '30秒', value: 30000 },
   { label: '1m', label_zh: '1分', value: 60000 },
