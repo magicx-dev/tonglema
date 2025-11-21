@@ -86,12 +86,21 @@ export const StatusCard: React.FC<StatusCardProps> = memo(({ site, result, onChe
           text: 'text-yellow-600 dark:text-yellow-400'
         };
           }
+          if (latency < 1000) {
+            return {
+              border: 'border-orange-500/40',
+              bg: 'bg-surface',
+              indicator: 'bg-orange-500',
+              glow: '',
+              text: 'text-orange-600 dark:text-orange-400'
+            };
+          }
           return {
-            border: 'border-orange-500/40',
+            border: 'border-red-500/40',
             bg: 'bg-surface',
-            indicator: 'bg-orange-500',
+            indicator: 'bg-red-500',
             glow: '',
-            text: 'text-orange-600 dark:text-orange-400'
+            text: 'text-red-600 dark:text-red-400'
           };
         }
         // 默认统一绿色
@@ -253,9 +262,11 @@ export const StatusCard: React.FC<StatusCardProps> = memo(({ site, result, onChe
                   ? 'bg-green-500' 
                   : latency < 500 
                   ? 'bg-green-400' 
-                  : latency < 1000 
+                  : latency < 800 
                   ? 'bg-yellow-500' 
-                  : 'bg-orange-500'
+                  : latency < 1000
+                  ? 'bg-orange-500'
+                  : 'bg-red-500'
                 : 'bg-success'
             }`}
           />

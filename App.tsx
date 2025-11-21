@@ -498,7 +498,17 @@ export default function App() {
                     </div>
                     <div>
                       <p className="text-[11px] font-medium text-orange-600 dark:text-orange-400 leading-tight">{t.legend_very_slow}</p>
-                      <p className="text-[10px] text-muted/70 leading-tight">&gt; 800ms</p>
+                      <p className="text-[10px] text-muted/70 leading-tight">800-1000ms</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-6 h-6 rounded border border-red-500/40 bg-surface flex items-center justify-center shrink-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-red-600 dark:text-red-400 leading-tight">{t.legend_extremely_slow}</p>
+                      <p className="text-[10px] text-muted/70 leading-tight">&gt; 1000ms</p>
                     </div>
                   </div>
                 </div>

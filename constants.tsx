@@ -209,6 +209,7 @@ export const TRANSLATIONS = {
     legend_medium: 'Medium',
     legend_slow: 'Slow',
     legend_very_slow: 'Very Slow',
+    legend_extremely_slow: 'Extremely Slow',
     categories: {
       Search: 'Search',
       Social: 'Social',
@@ -255,6 +256,7 @@ export const TRANSLATIONS = {
     legend_medium: '中等',
     legend_slow: '较慢',
     legend_very_slow: '很慢',
+    legend_extremely_slow: '极慢',
     categories: {
       Search: '搜索引擎',
       Social: '社交媒体',
