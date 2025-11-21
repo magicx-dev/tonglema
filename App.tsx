@@ -4,8 +4,25 @@ import { Header } from './components/Header';
 import { StatusCard } from './components/StatusCard';
 import { SITES, TRANSLATIONS } from './constants';
 import { checkConnectivity } from './services/networkService';
-import { CheckResult, ConnectivityStatus, CheckResultMap, SiteConfig, Language } from './types';
-import { Shield, Globe2, Info, Layers, Lock, Github } from 'lucide-react';
+import { detectLocation } from './services/locationService';
+import { CheckResult, ConnectivityStatus, CheckResultMap, SiteConfig, Language, LocationInfo } from './types';
+import { Shield, Globe2, Info, Layers, Lock, Github, MapPin } from 'lucide-react';
+
+/**
+ * 将国家代码转换为国旗 emoji
+ * @param countryCode 两位国家代码（如 'US', 'CN'）
+ * @returns 国旗 emoji 字符串
+ */
+const getCountryFlag = (countryCode: string): string => {
+  if (!countryCode || countryCode.length !== 2) return '';
+  
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 0x1F1E6 + char.charCodeAt(0) - 65);
+  
+  return String.fromCodePoint(...codePoints);
+};
 
 // 将常量移到组件外部，避免每次渲染都重新创建
 const CATEGORY_ORDER = ['AI', 'Search', 'Social', 'Media', 'Dev'];
@@ -62,6 +79,10 @@ export default function App() {
     }
     return false;
   });
+
+  // Location detection state
+  const [locationInfo, setLocationInfo] = useState<LocationInfo | null>(null);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
   // Sync theme state with DOM (主题已在 HTML 脚本中设置，这里确保状态同步)
   useEffect(() => {
@@ -249,6 +270,37 @@ export default function App() {
     return () => clearInterval(id);
   }, [refreshInterval, handleCheckAll]);
 
+  // Location detection function
+  const handleDetectLocation = useCallback(async () => {
+    setIsDetectingLocation(true);
+    try {
+      const location = await detectLocation();
+      setLocationInfo(location);
+      if (location) {
+        localStorage.setItem('locationInfo', JSON.stringify(location));
+      }
+    } catch (error) {
+      console.error('Failed to detect location:', error);
+    } finally {
+      setIsDetectingLocation(false);
+    }
+  }, []);
+
+  // Load location from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('locationInfo');
+    if (saved) {
+      try {
+        setLocationInfo(JSON.parse(saved));
+      } catch {
+        // Invalid saved data, ignore
+      }
+    }
+    // Auto-detect location on mount if not cached
+    handleDetectLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Run check on mount
   useEffect(() => {
     handleCheckAll();
@@ -303,7 +355,7 @@ export default function App() {
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8 space-y-10">
         
         {/* Overview Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
              <div className="p-2 rounded-lg bg-background/50 border border-border/50">
                <Shield className="w-5 h-5 text-success" />
@@ -336,6 +388,45 @@ export default function App() {
                <p className="text-xs font-medium text-muted uppercase tracking-wider">{t.network_mode}</p>
                <div className="flex items-baseline gap-2">
                  <p className="text-base font-bold text-text">{t.browser_proxy}</p>
+               </div>
+             </div>
+          </div>
+          <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
+             <div className="p-2 rounded-lg bg-background/50 border border-border/50">
+               <MapPin className="w-5 h-5 text-primary" />
+             </div>
+             <div className="flex-1 min-w-0">
+               <p className="text-xs font-medium text-muted uppercase tracking-wider">{t.location}</p>
+               <div className="flex items-baseline gap-2">
+                 {isDetectingLocation ? (
+                   <p className="text-sm font-bold text-muted animate-pulse">{t.detecting_location}</p>
+                 ) : locationInfo ? (
+                   <div className="flex flex-col min-w-0">
+                     <p className="text-sm font-bold text-text truncate flex items-center gap-1.5">
+                       {locationInfo.countryCode && (
+                         <span className="text-base leading-none">{getCountryFlag(locationInfo.countryCode)}</span>
+                       )}
+                       <span>
+                         {locationInfo.country || locationInfo.countryCode || ''}
+                         {locationInfo.city && ` (${locationInfo.city})`}
+                       </span>
+                     </p>
+                     {locationInfo.ip && (
+                       <a
+                         href={`https://www.google.com/search?q=${encodeURIComponent(locationInfo.ip)}`}
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         className="text-[10px] text-muted/70 font-mono truncate mt-0.5 hover:text-primary transition-colors inline-block"
+                         title={`${locationInfo.ip} - Click to search on Google`}
+                         onClick={(e) => e.stopPropagation()}
+                       >
+                         {locationInfo.ip}
+                       </a>
+                     )}
+                   </div>
+                 ) : (
+                   <p className="text-sm font-bold text-muted">{t.location_unknown}</p>
+                 )}
                </div>
              </div>
           </div>

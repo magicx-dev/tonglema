@@ -28,3 +28,15 @@ export interface CheckResult {
 }
 
 export type CheckResultMap = Record<string, CheckResult>;
+
+export interface LocationInfo {
+  ip: string;
+  country: string;
+  countryCode: string;
+  region?: string;
+  city?: string;
+  isp?: string;
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+}
