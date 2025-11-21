@@ -19,9 +19,9 @@ const getStatusStyles = (status: ConnectivityStatus, latency: number, showColorM
   switch (status) {
     case ConnectivityStatus.IDLE:
       return {
-        border: 'border-border',
-        bg: 'bg-surface',
-        indicator: 'bg-muted/40',
+        border: 'border-border dark:border-zinc-700',
+        bg: 'bg-surface dark:bg-zinc-800/50',
+        indicator: 'bg-muted/40 dark:bg-zinc-600',
       };
     case ConnectivityStatus.PENDING:
       return {
@@ -37,9 +37,9 @@ const getStatusStyles = (status: ConnectivityStatus, latency: number, showColorM
       };
     case ConnectivityStatus.ERROR:
       return {
-        border: 'border-border',
-        bg: 'bg-muted/20',
-        indicator: 'bg-muted/50',
+        border: 'border-border dark:border-zinc-700/80',
+        bg: 'bg-muted/20 dark:bg-zinc-800/70 dark:border-zinc-700',
+        indicator: 'bg-muted/50 dark:bg-zinc-600',
       };
     case ConnectivityStatus.SUCCESS:
       // 如果开启了颜色模式，根据延迟显示不同颜色
@@ -130,7 +130,7 @@ export const GridLayout: React.FC<GridLayoutProps> = memo(({
               relative aspect-square rounded-lg border ${styles.border} ${styles.bg}
               transition-all duration-300 flex items-center justify-center
               group overflow-hidden
-              ${isError ? 'grayscale-[50%] opacity-85' : ''}
+              ${isError ? 'grayscale-[50%] opacity-85 dark:opacity-70 dark:bg-zinc-800/80 dark:border-zinc-700/60' : ''}
               focus:outline-none focus:ring-2 focus:ring-primary/50
             `}
             aria-label={site.name}
@@ -178,10 +178,10 @@ export const GridLayout: React.FC<GridLayoutProps> = memo(({
                   initial={false}
                   animate={{
                     height: `${fillHeight}%`,
-                    opacity: refreshing ? 0.6 : 0.9
+                    opacity: refreshing ? 0.6 : 0.75
                   }}
                   transition={{ duration: 0.5, ease: 'easeOut' }}
-                  className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t ${fillColor} rounded-b-lg`}
+                  className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t ${fillColor} rounded-b-lg z-20 mix-blend-multiply dark:mix-blend-screen`}
                   style={{ 
                     borderTopLeftRadius: fillHeight > 90 ? '0.5rem' : '0',
                     borderTopRightRadius: fillHeight > 90 ? '0.5rem' : '0'
