@@ -136,8 +136,62 @@ export const GridLayout: React.FC<GridLayoutProps> = memo(({
             aria-label={site.name}
             title={site.name}
           >
+            {/* 水位填充效果（仅成功时显示） */}
+            {status === ConnectivityStatus.SUCCESS && (() => {
+              // 计算填充高度：延迟越低，填充越高 (0ms = 100%, 1000ms = 0%)
+              const fillHeight = Math.max((1000 - latency) / 1000 * 100, 0);
+              
+              // 根据 showColorMode 和延迟确定颜色
+              let fillColor = '';
+              if (showColorMode) {
+                // 多颜色模式：根据延迟使用不同颜色
+                if (latency < 200) {
+                  fillColor = 'from-green-500 to-green-400';
+                } else if (latency < 500) {
+                  fillColor = 'from-green-400 to-green-300';
+                } else if (latency < 800) {
+                  fillColor = 'from-yellow-500 to-yellow-400';
+                } else if (latency < 1000) {
+                  fillColor = 'from-orange-500 to-orange-400';
+                } else {
+                  fillColor = 'from-red-500 to-red-400';
+                }
+              } else {
+                // 单色模式：使用绿色系，延迟越低颜色越深
+                if (latency < 100) {
+                  fillColor = 'from-emerald-600 to-emerald-500';
+                } else if (latency < 200) {
+                  fillColor = 'from-emerald-500 to-emerald-400';
+                } else if (latency < 400) {
+                  fillColor = 'from-emerald-400 to-emerald-300';
+                } else if (latency < 600) {
+                  fillColor = 'from-emerald-300 to-emerald-200';
+                } else if (latency < 800) {
+                  fillColor = 'from-emerald-200 to-emerald-100';
+                } else {
+                  fillColor = 'from-emerald-100 to-emerald-50';
+                }
+              }
+              
+              return (
+                <motion.div
+                  initial={false}
+                  animate={{
+                    height: `${fillHeight}%`,
+                    opacity: refreshing ? 0.6 : 0.9
+                  }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t ${fillColor} rounded-b-lg`}
+                  style={{ 
+                    borderTopLeftRadius: fillHeight > 90 ? '0.5rem' : '0',
+                    borderTopRightRadius: fillHeight > 90 ? '0.5rem' : '0'
+                  }}
+                />
+              );
+            })()}
+
             {/* 图标 */}
-            <div className="relative w-full h-full flex items-center justify-center p-2">
+            <div className="relative w-full h-full flex items-center justify-center p-2 z-10">
               {iconUrl ? (
                 <img 
                   src={iconUrl} 
@@ -164,40 +218,13 @@ export const GridLayout: React.FC<GridLayoutProps> = memo(({
             </div>
 
             {/* 状态指示器 - 右上角 */}
-            <div className="absolute top-1 right-1 z-10">
+            <div className="absolute top-1 right-1 z-20">
               {refreshing ? (
                 <RefreshCw className="w-2 h-2 text-muted animate-spin" />
               ) : (
                 <div className={`w-2 h-2 rounded-full ${styles.indicator} shadow-sm ring-1 ring-background/10`} />
               )}
             </div>
-
-            {/* 底部进度条（仅成功时显示） */}
-            {status === ConnectivityStatus.SUCCESS && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black/5 dark:bg-white/5 overflow-hidden rounded-b-lg">
-                <motion.div 
-                  initial={false}
-                  animate={{ 
-                    width: `${Math.max((1000 - latency) / 1000 * 100, 0)}%`, 
-                    opacity: refreshing ? 0.5 : 1 
-                  }}
-                  transition={{ duration: 0.5 }}
-                  className={`h-full ${
-                    showColorMode
-                      ? latency < 200 
-                        ? 'bg-green-500' 
-                        : latency < 500 
-                        ? 'bg-green-400' 
-                        : latency < 800 
-                        ? 'bg-yellow-500' 
-                        : latency < 1000
-                        ? 'bg-orange-500'
-                        : 'bg-red-500'
-                      : 'bg-success'
-                  }`}
-                />
-              </div>
-            )}
           </motion.button>
         );
       })}
