@@ -166,6 +166,24 @@ export default function App() {
     localStorage.setItem('theme', newTheme);
   }, [theme]);
 
+  // Location detection function (定义在 handleCheckAll 之前，避免依赖顺序问题)
+  const handleDetectLocation = useCallback(async () => {
+    setIsDetectingLocation(true);
+    try {
+      const location = await detectLocation();
+      if (location) {
+        setLocationInfo(location);
+        localStorage.setItem('locationInfo', JSON.stringify(location));
+      }
+    } catch (error) {
+      console.error('Failed to detect location:', error);
+      // 确保即使出错也重置状态
+      setIsDetectingLocation(false);
+    } finally {
+      setIsDetectingLocation(false);
+    }
+  }, []);
+
   // Function to check a single site
   const handleCheckSite = useCallback(async (site: SiteConfig) => {
     // Mark as refreshing
@@ -231,6 +249,16 @@ export default function App() {
       return next;
     });
 
+    // 同时刷新 IP 地址信息（不阻塞主要检查流程）
+    // 使用 try-catch 确保错误不会影响主要流程
+    try {
+      handleDetectLocation().catch(error => {
+        console.error('Failed to refresh location during check:', error);
+      });
+    } catch (error) {
+      console.error('Error calling handleDetectLocation:', error);
+    }
+
     // Execute in batches
     const batchSize = 6; 
     for (let i = 0; i < SITES.length; i += batchSize) {
@@ -257,7 +285,7 @@ export default function App() {
     isCheckingRef.current = false;
     setIsChecking(false);
     setRefreshingIds(new Set()); // Ensure cleanup
-  }, []);
+  }, [handleDetectLocation]);
 
   // Auto Refresh Effect
   useEffect(() => {
@@ -269,22 +297,6 @@ export default function App() {
 
     return () => clearInterval(id);
   }, [refreshInterval, handleCheckAll]);
-
-  // Location detection function
-  const handleDetectLocation = useCallback(async () => {
-    setIsDetectingLocation(true);
-    try {
-      const location = await detectLocation();
-      setLocationInfo(location);
-      if (location) {
-        localStorage.setItem('locationInfo', JSON.stringify(location));
-      }
-    } catch (error) {
-      console.error('Failed to detect location:', error);
-    } finally {
-      setIsDetectingLocation(false);
-    }
-  }, []);
 
   // Load location from localStorage on mount
   useEffect(() => {
