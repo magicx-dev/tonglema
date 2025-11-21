@@ -357,7 +357,7 @@ export default function App() {
         {/* Overview Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
-             <div className="p-2 rounded-lg bg-background/50 border border-border/50">
+             <div className="p-2 rounded-lg bg-success/10 border border-success/20">
                <Shield className="w-5 h-5 text-success" />
              </div>
              <div>
@@ -369,8 +369,8 @@ export default function App() {
              </div>
           </div>
           <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
-             <div className="p-2 rounded-lg bg-background/50 border border-border/50">
-               <Globe2 className="w-5 h-5 text-primary" />
+             <div className="p-2 rounded-lg bg-orange-500/10 border border-orange-500/20">
+               <Globe2 className="w-5 h-5 text-orange-500" />
              </div>
              <div>
                <p className="text-xs font-medium text-muted uppercase tracking-wider">{t.avg_latency}</p>
@@ -381,8 +381,8 @@ export default function App() {
              </div>
           </div>
           <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
-             <div className="p-2 rounded-lg bg-background/50 border border-border/50">
-               <Info className="w-5 h-5 text-muted" />
+             <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
+               <Info className="w-5 h-5 text-purple-500" />
              </div>
              <div>
                <p className="text-xs font-medium text-muted uppercase tracking-wider">{t.network_mode}</p>
@@ -392,7 +392,7 @@ export default function App() {
              </div>
           </div>
           <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
-             <div className="p-2 rounded-lg bg-background/50 border border-border/50">
+             <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
                <MapPin className="w-5 h-5 text-primary" />
              </div>
              <div className="flex-1 min-w-0">
