@@ -54,6 +54,15 @@ export default function App() {
     return 'en';
   });
 
+  // Initialize color mode from localStorage
+  const [showColorMode, setShowColorMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('showColorMode');
+      return saved ? saved === 'true' : false;
+    }
+    return false;
+  });
+
   // Sync theme state with DOM (主题已在 HTML 脚本中设置，这里确保状态同步)
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
@@ -110,6 +119,10 @@ export default function App() {
       localStorage.setItem('lastChecked', lastChecked.toString());
     }
   }, [lastChecked]);
+
+  useEffect(() => {
+    localStorage.setItem('showColorMode', showColorMode.toString());
+  }, [showColorMode]);
 
   // Toggle Language
   const toggleLang = useCallback(() => {
@@ -244,7 +257,7 @@ export default function App() {
 
   // 使用 useMemo 缓存统计计算结果，只在 results 变化时重新计算
   const stats = useMemo(() => {
-    return Object.values(results).reduce<{ online: number; offline: number; avgLatency: number; count: number }>((acc, curr) => {
+    return Object.values(results).reduce<{ online: number; offline: number; avgLatency: number; count: number }>((acc, curr: CheckResult) => {
       if (curr.status === ConnectivityStatus.SUCCESS) acc.online++;
       if (curr.status === ConnectivityStatus.ERROR || curr.status === ConnectivityStatus.TIMEOUT) acc.offline++;
       if (curr.latency > 0) {
@@ -283,44 +296,46 @@ export default function App() {
         setRefreshInterval={setRefreshInterval}
         lang={lang}
         toggleLang={toggleLang}
+        showColorMode={showColorMode}
+        setShowColorMode={setShowColorMode}
       />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8 space-y-10">
         
         {/* Overview Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-surface/50 backdrop-blur-sm border border-border rounded-2xl p-6 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow">
-             <div className="p-3.5 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400 ring-1 ring-green-500/20">
-               <Shield className="w-7 h-7" />
+          <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
+             <div className="p-2 rounded-lg bg-background/50 border border-border/50">
+               <Shield className="w-5 h-5 text-success" />
              </div>
              <div>
-               <p className="text-sm font-medium text-muted uppercase tracking-wider">{t.services_online}</p>
+               <p className="text-xs font-medium text-muted uppercase tracking-wider">{t.services_online}</p>
                <div className="flex items-baseline gap-2">
-                 <p className="text-3xl font-bold text-text">{stats.online}</p>
-                 <span className="text-muted text-sm">/ {SITES.length}</span>
+                 <p className="text-2xl font-bold text-text">{stats.online}</p>
+                 <span className="text-muted text-xs">/ {SITES.length}</span>
                </div>
              </div>
           </div>
-          <div className="bg-surface/50 backdrop-blur-sm border border-border rounded-2xl p-6 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow">
-             <div className="p-3.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/20">
-               <Globe2 className="w-7 h-7" />
+          <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
+             <div className="p-2 rounded-lg bg-background/50 border border-border/50">
+               <Globe2 className="w-5 h-5 text-primary" />
              </div>
              <div>
-               <p className="text-sm font-medium text-muted uppercase tracking-wider">{t.avg_latency}</p>
+               <p className="text-xs font-medium text-muted uppercase tracking-wider">{t.avg_latency}</p>
                <div className="flex items-baseline gap-2">
-                 <p className="text-3xl font-bold text-text">{avgLatency}</p>
-                 <span className="text-sm font-medium text-muted">ms</span>
+                 <p className="text-2xl font-bold text-text">{avgLatency}</p>
+                 <span className="text-xs font-medium text-muted">ms</span>
                </div>
              </div>
           </div>
-          <div className="bg-surface/50 backdrop-blur-sm border border-border rounded-2xl p-6 flex items-center gap-5 shadow-sm hover:shadow-md transition-shadow">
-             <div className="p-3.5 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 ring-1 ring-purple-500/20">
-               <Info className="w-7 h-7" />
+          <div className="bg-surface border border-border rounded-xl p-4 flex items-center gap-4 transition-colors">
+             <div className="p-2 rounded-lg bg-background/50 border border-border/50">
+               <Info className="w-5 h-5 text-muted" />
              </div>
              <div>
-               <p className="text-sm font-medium text-muted uppercase tracking-wider">{t.network_mode}</p>
+               <p className="text-xs font-medium text-muted uppercase tracking-wider">{t.network_mode}</p>
                <div className="flex items-baseline gap-2">
-                 <p className="text-lg font-bold text-text">{t.browser_proxy}</p>
+                 <p className="text-base font-bold text-text">{t.browser_proxy}</p>
                </div>
              </div>
           </div>
@@ -354,6 +369,7 @@ export default function App() {
                       onCheck={handleCheckSite}
                       lang={lang}
                       isRefreshing={refreshingIds.has(site.id)}
+                      showColorMode={showColorMode}
                     />
                   ))}
                 </div>
@@ -379,6 +395,7 @@ export default function App() {
                       onCheck={handleCheckSite}
                       lang={lang}
                       isRefreshing={refreshingIds.has(site.id)}
+                      showColorMode={showColorMode}
                     />
                   ))}
                 </div>

@@ -195,6 +195,8 @@ export const TRANSLATIONS = {
     status_waiting: 'Waiting to check...',
     manual: 'Manual',
     check_again: 'Check again',
+    show_color_mode: 'Color Mode',
+    show_color_mode_desc: 'Show latency colors',
     categories: {
       Search: 'Search',
       Social: 'Social',
@@ -227,6 +229,8 @@ export const TRANSLATIONS = {
     status_waiting: '等待检测...',
     manual: '手动',
     check_again: '重新检测',
+    show_color_mode: '颜色模式',
+    show_color_mode_desc: '显示延迟颜色',
     categories: {
       Search: '搜索引擎',
       Social: '社交媒体',

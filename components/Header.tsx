@@ -1,6 +1,6 @@
 
 import React, { memo, useMemo } from 'react';
-import { Activity, Play, RefreshCw, Sun, Moon, Clock, Languages } from 'lucide-react';
+import { Activity, Play, RefreshCw, Sun, Moon, Clock, Languages, Palette } from 'lucide-react';
 import { Language } from '../types';
 import { TRANSLATIONS } from '../constants';
 
@@ -14,6 +14,8 @@ interface HeaderProps {
   setRefreshInterval: (ms: number) => void;
   lang: Language;
   toggleLang: () => void;
+  showColorMode: boolean;
+  setShowColorMode: (show: boolean) => void;
 }
 
 const INTERVAL_OPTIONS = [
@@ -34,7 +36,9 @@ export const Header: React.FC<HeaderProps> = memo(({
   refreshInterval,
   setRefreshInterval,
   lang,
-  toggleLang
+  toggleLang,
+  showColorMode,
+  setShowColorMode
 }) => {
   const t = useMemo(() => TRANSLATIONS[lang], [lang]);
 
@@ -77,6 +81,17 @@ export const Header: React.FC<HeaderProps> = memo(({
             >
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
+            <button
+              onClick={() => setShowColorMode(!showColorMode)}
+              className={`p-2 rounded-lg bg-surface border border-border transition-colors ${
+                showColorMode 
+                  ? 'text-primary border-primary/30' 
+                  : 'text-text hover:bg-muted/10'
+              }`}
+              title={t.show_color_mode_desc}
+            >
+              <Palette className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
@@ -100,6 +115,19 @@ export const Header: React.FC<HeaderProps> = memo(({
               aria-label="Toggle Theme"
             >
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+
+            <button
+              onClick={() => setShowColorMode(!showColorMode)}
+              className={`p-2 rounded-lg transition-colors ${
+                showColorMode 
+                  ? 'text-primary bg-primary/10 hover:bg-primary/15' 
+                  : 'text-muted hover:text-text hover:bg-surface'
+              }`}
+              aria-label={t.show_color_mode}
+              title={t.show_color_mode_desc}
+            >
+              <Palette className="w-4 h-4" />
             </button>
           </div>
 
