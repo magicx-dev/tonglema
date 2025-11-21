@@ -710,7 +710,7 @@ export default function App() {
 
           <div className="flex flex-col items-center gap-1.5">
             <p className="text-[10px] text-muted/40">
-              © 2023-2025 <span className="font-medium text-muted/60 hover:text-primary transition-colors cursor-default">Magicx.dev</span>
+              © 2023-2025 <a href="https://magicx.dev" target="_blank" rel="noopener noreferrer" className="font-medium text-muted/60 hover:text-primary transition-colors cursor-pointer">MagicX</a>
             </p>
             <a 
               href="https://github.com/simonxmau/tonglema" 
