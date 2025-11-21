@@ -410,9 +410,7 @@ export default function App() {
              <div className="flex-1 min-w-0">
                <p className="text-xs font-medium text-muted uppercase tracking-wider">{t.location}</p>
                <div className="flex items-baseline gap-2">
-                 {isDetectingLocation ? (
-                   <p className="text-sm font-bold text-muted animate-pulse">{t.detecting_location}</p>
-                 ) : locationInfo ? (
+                 {locationInfo ? (
                    <div className="flex flex-col min-w-0">
                      <p className="text-sm font-bold text-text truncate flex items-center gap-1.5">
                        {locationInfo.countryCode && (
@@ -422,6 +420,9 @@ export default function App() {
                          {locationInfo.country || locationInfo.countryCode || ''}
                          {locationInfo.city && ` (${locationInfo.city})`}
                        </span>
+                       {isDetectingLocation && (
+                         <span className="ml-1 text-xs text-muted animate-pulse">•</span>
+                       )}
                      </p>
                      {locationInfo.ip && (
                        <a
@@ -436,6 +437,8 @@ export default function App() {
                        </a>
                      )}
                    </div>
+                 ) : isDetectingLocation ? (
+                   <p className="text-sm font-bold text-muted animate-pulse">{t.detecting_location}</p>
                  ) : (
                    <p className="text-sm font-bold text-muted">{t.location_unknown}</p>
                  )}
