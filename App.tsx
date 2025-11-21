@@ -449,86 +449,88 @@ export default function App() {
 
         {/* Color Legend */}
         <div className="bg-surface border border-border rounded-xl p-3">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-            {/* Unreachable */}
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-muted/20 border border-border grayscale-[50%] opacity-85 flex items-center justify-center shrink-0">
-                <div className="w-2 h-2 rounded-full bg-muted/50"></div>
-              </div>
-              <div>
-                <p className="text-[11px] font-medium text-text leading-tight">{t.legend_unreachable}</p>
-                <p className="text-[10px] text-muted/70 leading-tight">{t.legend_unreachable_desc}</p>
-              </div>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-0.5 rounded-full bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
-                <div className="h-full w-full bg-success"></div>
-              </div>
-              <div>
-                <p className="text-[11px] font-medium text-text leading-tight">{t.legend_progress_bar}</p>
-                <p className="text-[10px] text-muted/70 leading-tight">{t.legend_progress_bar_desc}</p>
-              </div>
-            </div>
-
-            {/* Color Mode Colors (only show when enabled) */}
-            {showColorMode && (
-              <>
-                <div className="h-6 w-px bg-border/50"></div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-6 h-6 rounded border border-green-500/40 bg-surface flex items-center justify-center shrink-0">
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-medium text-green-600 dark:text-green-400 leading-tight">{t.legend_fast}</p>
-                      <p className="text-[10px] text-muted/70 leading-tight">&lt; 200ms</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-6 h-6 rounded border border-green-400/40 bg-surface flex items-center justify-center shrink-0">
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-medium text-green-500 dark:text-green-300 leading-tight">{t.legend_medium}</p>
-                      <p className="text-[10px] text-muted/70 leading-tight">200-500ms</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-6 h-6 rounded border border-yellow-500/40 bg-surface flex items-center justify-center shrink-0">
-                      <div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-medium text-yellow-600 dark:text-yellow-400 leading-tight">{t.legend_slow}</p>
-                      <p className="text-[10px] text-muted/70 leading-tight">500-800ms</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-6 h-6 rounded border border-orange-500/40 bg-surface flex items-center justify-center shrink-0">
-                      <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-medium text-orange-600 dark:text-orange-400 leading-tight">{t.legend_very_slow}</p>
-                      <p className="text-[10px] text-muted/70 leading-tight">800-1000ms</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-6 h-6 rounded border border-red-500/40 bg-surface flex items-center justify-center shrink-0">
-                      <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-medium text-red-600 dark:text-red-400 leading-tight">{t.legend_extremely_slow}</p>
-                      <p className="text-[10px] text-muted/70 leading-tight">&gt; 1000ms</p>
-                    </div>
-                  </div>
+          <div className="overflow-x-auto -mx-3 px-3 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex items-center gap-x-4 sm:gap-x-6 min-w-max">
+              {/* Unreachable */}
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-muted/20 border border-border grayscale-[50%] opacity-85 flex items-center justify-center shrink-0">
+                  <div className="w-2 h-2 rounded-full bg-muted/50"></div>
                 </div>
-              </>
-            )}
+                <div>
+                  <p className="text-[11px] font-medium text-text leading-tight">{t.legend_unreachable}</p>
+                  <p className="text-[10px] text-muted/70 leading-tight">{t.legend_unreachable_desc}</p>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="w-8 h-0.5 rounded-full bg-black/5 dark:bg-white/5 overflow-hidden shrink-0">
+                  <div className="h-full w-full bg-success"></div>
+                </div>
+                <div>
+                  <p className="text-[11px] font-medium text-text leading-tight">{t.legend_progress_bar}</p>
+                  <p className="text-[10px] text-muted/70 leading-tight">{t.legend_progress_bar_desc}</p>
+                </div>
+              </div>
+
+              {/* Color Mode Colors (only show when enabled) */}
+              {showColorMode && (
+                <>
+                  <div className="h-6 w-px bg-border/50 shrink-0"></div>
+                  <div className="flex items-center gap-x-3 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="w-6 h-6 rounded border border-green-500/40 bg-surface flex items-center justify-center shrink-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-medium text-green-600 dark:text-green-400 leading-tight">{t.legend_fast}</p>
+                        <p className="text-[10px] text-muted/70 leading-tight">&lt; 200ms</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="w-6 h-6 rounded border border-green-400/40 bg-surface flex items-center justify-center shrink-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-medium text-green-500 dark:text-green-300 leading-tight">{t.legend_medium}</p>
+                        <p className="text-[10px] text-muted/70 leading-tight">200-500ms</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="w-6 h-6 rounded border border-yellow-500/40 bg-surface flex items-center justify-center shrink-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-medium text-yellow-600 dark:text-yellow-400 leading-tight">{t.legend_slow}</p>
+                        <p className="text-[10px] text-muted/70 leading-tight">500-800ms</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="w-6 h-6 rounded border border-orange-500/40 bg-surface flex items-center justify-center shrink-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-medium text-orange-600 dark:text-orange-400 leading-tight">{t.legend_very_slow}</p>
+                        <p className="text-[10px] text-muted/70 leading-tight">800-1000ms</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="w-6 h-6 rounded border border-red-500/40 bg-surface flex items-center justify-center shrink-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-medium text-red-600 dark:text-red-400 leading-tight">{t.legend_extremely_slow}</p>
+                        <p className="text-[10px] text-muted/70 leading-tight">&gt; 1000ms</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
