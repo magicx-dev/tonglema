@@ -101,6 +101,11 @@ You can also access the online version directly without installation:
 
 🌐 [TongLeMa.com](https://tonglema.com) - Try it now
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=simonxmau/tonglema&type=date&legend=top-left)](https://www.star-history.com/#simonxmau/tonglema&type=date&legend=top-left)
+
+
 ## Development & Contribution
 
 Contributions and suggestions are welcome! You can participate by:

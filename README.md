@@ -101,6 +101,11 @@
 
 🌐 [TongLeMa.com](https://tonglema.com) - 立即体验
 
+## Star 历史
+
+[![Star History Chart](https://api.star-history.com/svg?repos=simonxmau/tonglema&type=date&legend=top-left)](https://www.star-history.com/#simonxmau/tonglema&type=date&legend=top-left)
+
+
 ## 开发与贡献
 
 欢迎贡献和建议！您可以通过以下方式参与：
