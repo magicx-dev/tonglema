@@ -59,6 +59,16 @@
 * **Framer Motion** - 动画库
 * **Lucide React** - 图标库
 
+## 快速部署
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/simonxmau/tonglema)
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/simonxmau/tonglema)
+
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/simonxmau/tonglema)
+
+[![amplifybutton](https://oneclick.amplifyapp.com/button.svg)](https://console.aws.amazon.com/amplify/home#/deploy?repo=https://github.com/simonxmau/tonglema)
+
 ## 安装
 
 ### 开发环境
@@ -100,6 +110,8 @@
 您也可以直接访问在线版本，无需安装：
 
 🌐 [TongLeMa.com](https://tonglema.com) - 立即体验
+
+🚀 [Vercel 部署版本](https://tonglema-com.vercel.app/) - Vercel 镜像
 
 ## Star 历史
 

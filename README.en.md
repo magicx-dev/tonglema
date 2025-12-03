@@ -59,6 +59,16 @@
 * **Framer Motion** - Animation library
 * **Lucide React** - Icon library
 
+## Quick Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/simonxmau/tonglema)
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/simonxmau/tonglema)
+
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/simonxmau/tonglema)
+
+[![amplifybutton](https://oneclick.amplifyapp.com/button.svg)](https://console.aws.amazon.com/amplify/home#/deploy?repo=https://github.com/simonxmau/tonglema)
+
 ## Installation
 
 ### Development
@@ -100,6 +110,8 @@ The built files will be in the `dist` directory, ready for deployment to any sta
 You can also access the online version directly without installation:
 
 🌐 [TongLeMa.com](https://tonglema.com) - Try it now
+
+🚀 [Vercel Deployment](https://tonglema-com.vercel.app/) - Vercel Mirror
 
 ## Star History
 
