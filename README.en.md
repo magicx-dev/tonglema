@@ -105,6 +105,65 @@
 
 The built files will be in the `dist` directory, ready for deployment to any static hosting service (Vercel, Netlify, GitHub Pages, etc.).
 
+### Docker Build
+
+The project includes Docker support for quick containerized deployment:
+
+1. **Build Docker image**:
+   ```bash
+   docker build -t tonglema .
+   ```
+
+2. **Run container**:
+   ```bash
+   docker run -d -p 8080:80 --name tonglema tonglema
+   ```
+
+3. **Access the application**:
+   Open your browser and navigate to `http://localhost:8080`
+
+4. **Stop container**:
+   ```bash
+   docker stop tonglema
+   docker rm tonglema
+   ```
+
+The Docker image uses multi-stage builds and is based on nginx for serving static files, providing a small image size and excellent performance.
+
+### Docker Compose (Recommended)
+
+Using Docker Compose provides a more convenient way to manage containers:
+
+1. **Build and start services**:
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Check service status**:
+   ```bash
+   docker-compose ps
+   ```
+
+3. **View logs**:
+   ```bash
+   docker-compose logs -f
+   ```
+
+4. **Stop services**:
+   ```bash
+   docker-compose down
+   ```
+
+5. **Rebuild and start**:
+   ```bash
+   docker-compose up -d --build
+   ```
+
+6. **Access the application**:
+   Open your browser and navigate to `http://localhost:8080`
+
+The Docker Compose configuration includes health checks, auto-restart, and other features suitable for production environments.
+
 ## Live Demo
 
 You can also access the online version directly without installation:

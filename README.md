@@ -105,6 +105,65 @@
 
 构建后的文件将位于 `dist` 目录，可部署到任何静态托管服务（Vercel、Netlify、GitHub Pages 等）。
 
+### Docker 构建
+
+项目提供了 Docker 支持，可以快速构建和运行容器化版本：
+
+1. **构建 Docker 镜像**：
+   ```bash
+   docker build -t tonglema .
+   ```
+
+2. **运行容器**：
+   ```bash
+   docker run -d -p 8080:80 --name tonglema tonglema
+   ```
+
+3. **访问应用**：
+   在浏览器中打开 `http://localhost:8080`
+
+4. **停止容器**：
+   ```bash
+   docker stop tonglema
+   docker rm tonglema
+   ```
+
+Docker 镜像使用多阶段构建，最终基于 nginx 提供静态文件服务，体积小且性能优异。
+
+### Docker Compose（推荐）
+
+使用 Docker Compose 可以更便捷地管理容器：
+
+1. **构建并启动服务**：
+   ```bash
+   docker compose up -d
+   ```
+
+2. **查看服务状态**：
+   ```bash
+   docker compose ps
+   ```
+
+3. **查看日志**：
+   ```bash
+   docker compose logs -f
+   ```
+
+4. **停止服务**：
+   ```bash
+   docker compose down
+   ```
+
+5. **重新构建并启动**：
+   ```bash
+   docker compose up -d --build
+   ```
+
+6. **访问应用**：
+   在浏览器中打开 `http://localhost:8080`
+
+Docker Compose 配置包含了健康检查、自动重启等特性，更适合生产环境使用。
+
 ## 在线访问
 
 您也可以直接访问在线版本，无需安装：
